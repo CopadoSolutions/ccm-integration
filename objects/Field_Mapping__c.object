@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <allowInChatterGroups>false</allowInChatterGroups>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableChangeDataCapture>false</enableChangeDataCapture>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableReports>false</enableReports>
+    <enableSearch>false</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <fields>
+        <fullName>Exclude_from_su__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>Make this checkbox checked if you don&apos;t want this field to be updated from third party platform.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Make this checkbox checked if you don&apos;t want this field to be updated from third party platform.</inlineHelpText>
+        <label>Exclude from Salesforce update</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Exclude_from_tpu__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>That field is defined to exclude Mapping records in use on code level for look up purposes(like developer id and project id Mapping)
+Make it checked for the fields which do not exist on external system.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>That field is defined to exclude Mapping records in use on code level for look up purposes(like developer id and project id Mapping)
+Make it checked for the fields which do not exist on external system.</inlineHelpText>
+        <label>Exclude from Third Party update</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Project__c</fullName>
+        <deleteConstraint>Restrict</deleteConstraint>
+        <externalId>false</externalId>
+        <label>Project</label>
+        <referenceTo>copado__Project__c</referenceTo>
+        <relationshipLabel>Field Mappings</relationshipLabel>
+        <relationshipName>Field_Mappings</relationshipName>
+        <required>true</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Salesforce_Field_Name__c</fullName>
+        <externalId>false</externalId>
+        <label>Salesforce Field Name</label>
+        <length>255</length>
+        <required>true</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Target_Field_Type__c</fullName>
+        <description>Default value is set to string if not selected.</description>
+        <externalId>false</externalId>
+        <label>Target Field Type</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <restricted>true</restricted>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>string</fullName>
+                    <default>false</default>
+                    <label>string</label>
+                </value>
+                <value>
+                    <fullName>object</fullName>
+                    <default>false</default>
+                    <label>object</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+    <fields>
+        <fullName>Third_Party_Field_Name__c</fullName>
+        <externalId>false</externalId>
+        <label>Third Party Field Name</label>
+        <length>255</length>
+        <required>true</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <label>Field Mapping</label>
+    <nameField>
+        <displayFormat>FM-{0000000000}</displayFormat>
+        <label>Field Mapping Name</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Field Mappings</pluralLabel>
+    <searchLayouts/>
+    <sharingModel>ReadWrite</sharingModel>
+    <visibility>Public</visibility>
+</CustomObject>

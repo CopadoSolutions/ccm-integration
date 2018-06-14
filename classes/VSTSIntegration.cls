@@ -94,6 +94,7 @@ public without sharing class VSTSIntegration implements IIntegration{
                 finalJson += string.format(JsonTemplate,new List<string>{fieldMap.get(s),string.escapeSingleQuotes(string.valueOf(cUserStory.get(s)))}) + '},{';
             }
         }
+        system.debug('finalJson==> '+finalJson);
         //callout body to update VSTS record which is created from field mappings under related project and current field values
         finalJson = finalJson.substring(0,finalJson.length()-2) + ']';
         namedCredential = usItem.copado__Project__r.Copado_Integration_Setting__r.Named_Credential__c;

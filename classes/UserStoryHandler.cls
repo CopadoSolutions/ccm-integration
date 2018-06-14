@@ -6,7 +6,9 @@ public class UserStoryHandler{
         for(copado__user_story__c us:usRecords){
             usIds.add(us.id);
         }
-        callFactory4ThirdPartyUpdate(usIds);
+        if(!System.isFuture() && !System.isBatch()) {
+            callFactory4ThirdPartyUpdate(usIds);
+        }
     } 
     @future(callout=true)
     public static void callFactory4ThirdPartyUpdate(set<id> usIds){

@@ -10,6 +10,7 @@
         <members>Method</members>
         <members>MockHttpResponseGenerator</members>
         <members>ScheduleUserStoryFetch</members>
+        <members>SyncUserStoriesController</members>
         <members>TestIntegration</members>
         <members>UserStoryHandler</members>
         <members>Utilities</members>
@@ -17,7 +18,10 @@
         <name>ApexClass</name>
     </types>
     <types>
-        <members>Callout_Log__c.LastActivityDate</members>
+        <members>SyncUserStories</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
         <members>Callout_Log__c.Project__c</members>
         <members>Callout_Log__c.Response_Body__c</members>
         <members>Callout_Log__c.Status_Code__c</members>
@@ -47,8 +51,16 @@
         <name>CustomObject</name>
     </types>
     <types>
+        <members>Copado_Integration_Setting__c</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
         <members>SendUpdatedValues2TP-6</members>
         <name>Flow</name>
+    </types>
+    <types>
+        <members>copado__Project__c.Sync_External_User_Stories</members>
+        <name>WebLink</name>
     </types>
     <version>42.0</version>
 </Package>

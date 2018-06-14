@@ -44,4 +44,15 @@
         <type>Text</type>
         <unique>false</unique>
     </fields>
+    <webLinks>
+        <fullName>Sync_External_User_Stories</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <encodingKey>UTF-8</encodingKey>
+        <linkType>url</linkType>
+        <masterLabel>Sync External User Stories</masterLabel>
+        <openType>replace</openType>
+        <protected>false</protected>
+        <url>/apex/SyncUserStories?pid={!copado__Project__c.Id}</url>
+    </webLinks>
 </CustomObject>

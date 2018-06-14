@@ -105,45 +105,54 @@ public with sharing class JiraIntegration implements IIntegration{
         pid = selectedProject.id;
         projectExtId = selectedProject.Project_External_Id__c;
         namedCredential = selectedProject.Copado_Integration_Setting__r.Named_Credential__c;
+        integer startIndex = 0;
+        boolean shouldContinue = true;
+        integer total;
         //gets issues via jqr
-        string responseText = Utilities.MakeCallout(namedCredential,'',projectExtId,authQueryPath,'',new List<string>{contentTypeHeader},Method.GET,null,null,selectedProject);
-        Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(responseText);
-        integer total = Integer.valueOf(results.get('total'));
-        System.debug('Total number of issues: '+total);
-        List<Object> issues = (List<Object>)results.get('issues');
-        Map<string,string> keyValuepairTempMap;
-        for(Object issue : issues) {
-            keyValuepairTempMap = new Map<string,string>();
-            Map<string, Object> currentIssue = (Map<string, object>) issue;
-            //below three rows are in use for look up and external id purpose
-            keyValuepairTempMap.put('key',(string)currentIssue.get('key'));
-            keyValuepairTempMap.put('id',(string)currentIssue.get('id'));
-            keyValuepairTempMap.put('projectid',pid);
-            if(null != currentIssue.get('fields')) {
-                Map<string,object> fields = (Map<string, object>)currentIssue.get('fields');
-                for(string cf:fields.keySet()){
-                    //prepares values from string
-                    if(fields.get(cf) instanceof string || fields.get(cf) == null){
-                        keyValuepairTempMap.put(cf,(string)fields.get(cf));
-                    }
-                    //prepares values from Json object
-                    else if(fields.get(cf) instanceof Map<string, object>){
-                        Map<string,object> tempObject = (Map<string,object>)fields.get(cf);
-                        if(null != tempObject.get('emailAddress')){
-                            //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
-                            string cuEmail = (string)tempObject.get('emailAddress');
-                            if(cf == 'assignee' && Utilities.userMap.containsKey(cuEmail)){
-                                keyValuepairTempMap.put('developer',utilities.userMap.get(cuEmail));
+        while(shouldContinue) {
+            string responseText = Utilities.MakeCallout(namedCredential, '', projectExtId, authQueryPath, '&startAt=' + startIndex, new List<string>{
+                    contentTypeHeader
+            }, Method.GET, null, null, selectedProject);
+            Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(responseText);
+            total = Integer.valueOf(results.get('total'));
+            startIndex = Integer.valueOf(results.get('startAt'));
+            System.debug('Total number of issues: ' + total);
+            List<Object> issues = (List<Object>) results.get('issues');
+            Map<string, string> keyValuepairTempMap;
+            for (Object issue : issues) {
+                keyValuepairTempMap = new Map<string, string>();
+                Map<string, Object> currentIssue = (Map<string, object>) issue;
+                //below three rows are in use for look up and external id purpose
+                keyValuepairTempMap.put('key', (string) currentIssue.get('key'));
+                keyValuepairTempMap.put('id', (string) currentIssue.get('id'));
+                keyValuepairTempMap.put('projectid', pid);
+                if (null != currentIssue.get('fields')) {
+                    Map<string, object> fields = (Map<string, object>) currentIssue.get('fields');
+                    for (string cf : fields.keySet()) {
+                        //prepares values from string
+                        if (fields.get(cf) instanceof string || fields.get(cf) == null) {
+                            keyValuepairTempMap.put(cf, (string) fields.get(cf));
+                        }
+                        //prepares values from Json object
+                        else if (fields.get(cf) instanceof Map<string, object>) {
+                            Map<string, object> tempObject = (Map<string, object>) fields.get(cf);
+                            if (null != tempObject.get('emailAddress')) {
+                                //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
+                                string cuEmail = (string) tempObject.get('emailAddress');
+                                if (cf == 'assignee' && Utilities.userMap.containsKey(cuEmail)) {
+                                    keyValuepairTempMap.put('developer', utilities.userMap.get(cuEmail));
+                                } else keyValuepairTempMap.put(cf, (string) tempObject.get('emailAddress'));
+                            } else if (null != tempObject.get('name')) {
+                                keyValuepairTempMap.put(cf, (string) tempObject.get('name'));
                             }
-                            else keyValuepairTempMap.put(cf,(string)tempObject.get('emailAddress'));
-                        }
-                        else if(null != tempObject.get('name')){
-                            keyValuepairTempMap.put(cf,(string)tempObject.get('name'));
                         }
                     }
+                    userStoryList.add(keyValuepairTempMap);
                 }
-                userStoryList.add(keyValuepairTempMap);
             }
+            if(total - startIndex < 50){
+                shouldContinue = false;
+            }else startIndex = startIndex + 50;
         }
         utilities.createLogRecords();
         //returns list to executeUserStoryUpsert batch class

@@ -53,8 +53,8 @@ Target Field Type. String or object types. This type is used for the JSON file c
 
 Mandatory Field Mapping records for both JIRA and VSTS:
 Salesforce_Field_Name__c | Third_Party_Field_Name__c | Exclude_from_tpu__c
-       copado__Project__c 		   projectId 			     true
-       External_Id__c        	  	        id            			     true
+       copado__Project__c 		   projectId 		      true
+       External_Id__c        	     id            	      true(false for VSTS)
 
 ## New Apex Class - ScheduleUserStoryFetch 
 The new class ScheduleUserStoryFetch has been created to perform a bulk from the external provider to Salesforce. Depending on the configuration of its cron expression, it will carry out the bulk operation periodically. It will retrieve all the mapped fields and will update the Salesforce fields with the external data.

@@ -88,10 +88,9 @@ Jira sends 204 code when Salesforce sends a record and the operation was success
 Some considerations when reading the logs:
 
 For each operation, Jira sends 3 callouts.(since status is not structured as a field on JIRA, first two callouts are going to transition object to fetch available values and change it then the third one is for updating the record.)
-
 For each operation, VSTS sends 1 call out.
-At fetch level, Jira performs 1 callouts.
 
+At fetch level, Jira performs 1 callouts.
 At fetch level, VSTS performs 2 callouts.(first one is for having the workItem ids which returned from your query and the second one is for fetching those records with those ids.)
 
 

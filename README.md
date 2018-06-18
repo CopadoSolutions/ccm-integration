@@ -54,8 +54,8 @@ Optional fields:
 ### Mandatory Field Mapping records for both JIRA and VSTS:
 
 Salesforce_Field_Name__c | Third_Party_Field_Name__c | Exclude_from_tpu__c
--       copado__Project__c 		   projectId 			     true
--       External_Id__c        	  	   id              true(False for VSTS)
+-       copado__Project__c 		   projectId 		 true
+-       External_Id__c        	  	id               true(False for VSTS)
 
 
 ## New Apex Class - ScheduleUserStoryFetch 

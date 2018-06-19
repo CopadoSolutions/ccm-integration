@@ -1,7 +1,10 @@
 /**
- * Created by umitcanuckan on 06/06/2018.
+ * Strict HTTP method types
+ *
+ * @author Ümit Can Uçkan
+ * @version 1.0
+ * @since CCM Integrations 1.0
  */
-//strict http method types
 public enum Method {
     GET,POST,PUT
 }

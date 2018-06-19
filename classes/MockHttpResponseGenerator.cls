@@ -1,7 +1,10 @@
 /**
- * Created by umitcanuckan on 12/06/2018.
+ * Mock HTTP class to emulate and test JSON responses from External Providers' APIs
+ *
+ * @author Ümit Can Uçkan
+ * @version 1.0
+ * @since CCM Integrations 1.0
  */
-
 @isTest
 public class MockHttpResponseGenerator implements HttpCalloutMock {
     protected Integer code;

@@ -1,11 +1,19 @@
 /**
- * Created by umitcanuckan on 06/06/2018.
+ * Integration Factory class. Returns the Adapter for the selected external provider.
+ *
+ * @author Ümit Can Uçkan
+ * @version 1.0
+ * @since CCM Integrations 1.0
  */
-
 public with sharing class IntegrationFactory {
-    //Creates and instance based on the type field of related project's Copado Integration Setting record
-    public static IIntegration returnInstance(string type){
-        //TODO: use these types on the page you will create
+    /**
+     * Creates and instance based on the type field of related project's Copado Integration Setting record
+     *
+     * @param type
+     *
+     * @return IIntegration
+     */
+    public static IIntegration returnInstance(String type){
         if(type == 'Visual Studio Team Services'){
             IIntegration VSTSInstance = new VSTSIntegration();
             return VSTSInstance;
@@ -14,8 +22,9 @@ public with sharing class IntegrationFactory {
             IIntegration JIRAInstance = new JiraIntegration();
             return JIRAInstance;
         }
-        else{//this is not possible as long as you do not add new values, since external type field on Copado Integration Settings object is a restricted picklist
-            system.debug('You can only use JIRA or VSTS integration types!');
+        else{
+            //Customize the logic in this if and the following error message in order to support extra providers
+            System.debug('You can only use JIRA or VSTS integration types!');
             return null;
         }
     }

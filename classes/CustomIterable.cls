@@ -1,30 +1,35 @@
 /**
- * Created by umitcanuckan on 07/06/2018.
+ * Iterable implementation for Object.
+ *
+ * @author Ümit Can Uçkan
+ * @version 1.0
+ * @since CCM Integrations 1.0
  */
+global with sharing class CustomIterable implements Iterator<Object> {
 
-global class CustomIterable implements Iterator<object>{
+    List<Object> usList { get; set; }
+    Integer i { get; set; }
+    Integer listSize;
 
-    List<object> usList {get; set;}
-    Integer i {get; set;}
-    integer listSize;
-
-    public CustomIterable(List<object> listObj){
+    public CustomIterable(List<Object> listObj) {
         usList = listObj;
         listSize = usList.size();
         i = 0;
     }
 
-    global boolean hasNext(){
-        if(i >= usList.size()) {
+    global Boolean hasNext() {
+        if (i >= usList.size()) {
             return false;
         } else {
             return true;
         }
     }
 
-    global object next(){
-        if(i == listSize){return null;}
+    global Object next() {
+        if (i == listSize) {
+            return null;
+        }
         i++;
-        return usList[i-1];
+        return usList[i - 1];
     }
 }

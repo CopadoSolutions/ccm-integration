@@ -1,149 +1,170 @@
 /**
- * Created by umitcanuckan on 05/06/2018.
+ * Implementation class for Jira. This class can be customized including extra logic, and cloned for supporting another provider.
+ *
+ * How to schedule the fetch process:
+ * ScheduleUserStoryFetch Susf = new ScheduleUserStoryFetch (prpjectRecordId);
+ * String str = Datetime.now().addSeconds(5).format('s m H d M ? yyyy');
+ * String jobID = system.schedule('ScheduleUserStoryFetch - ' + DateTime.Now() + '.' + math.mod(DateTime.now().getTime(), 1000), str, Susf);
+ * @author Ümit Can Uçkan
+ * @version 1.0
+ * @since CCM Integrations 1.0
  */
 
-/*
-* How to schedule the fetch process
-*
-* ScheduleUserStoryFetch Susf = new ScheduleUserStoryFetch (prpjectRecordId);
-* String str = Datetime.now().addSeconds(5).format('s m H d M ? yyyy');
-* String jobID = system.schedule('ScheduleUserStoryFetch - ' + DateTime.Now() + '.' + math.mod(DateTime.now().getTime(), 1000), str, Susf);
-*
-* */
-
-public with sharing class JiraIntegration implements IIntegration{
+public with sharing class JiraIntegration implements IIntegration {
     //will be filled with related project/user Story record
-    public string projectExtId;
-    public string namedCredential;
+    public String projectExtId;
+    public String namedCredential;
 
-    //endpoint path to fetch records from JIRA
-    public final string authQueryPath = 'search?jql=project=';
+    //endpoint path to fetch records from Jira
+    public final String authQueryPath = 'search?jql=project=';
 
     //headers for callout
-    public final string contentTypeHeader = 'Content-Type:application/json';
-    public final string connectionHeader = 'Connection:keep-alive';
+    public final String contentTypeHeader = 'Content-Type:application/json';
+    public final String connectionHeader = 'Connection:keep-alive';
 
-    //Json template to use on string.format function for object types
-    public final string JsonTemplateInnerObject = '"{0}" :lcurly"name" : "{1}"rcurly';
-    //Json template to use on string.format function for string types
-    public final string JsonTemplateInnerString = '"{0}" :"{1}"';
-    public final string JsonTemplateOuter = '{"fields" : {';
+    //Json template to use on String.format function for Object types
+    public final String JsonTemplateInnerObject = '"{0}" :lcurly"name" : "{1}"rcurly';
+    //Json template to use on String.format function for String types
+    public final String JsonTemplateInnerString = '"{0}" :"{1}"';
+    public final String JsonTemplateOuter = '{"fields" : {';
 
     //template to be able to change the status via transition
     //in use on updateStatus method
-    public string transitionTemplate = 'lcurly"transition":lcurly"id":"{0}"rcurlyrcurly';
+    public String transitionTemplate = 'lcurly"transition":lcurly"id":"{0}"rcurlyrcurly';
 
     //endpoint path to reach to specified issue
-    public string updateParameterString = 'issue/{0}';
+    public String updateParameterString = 'issue/{0}';
     //endpoint path to fetch available statuses on related issue
-    public string updateParameter4TransitionString = 'issue/{0}/transitions?Expand=transitions.fields';
+    public String updateParameter4TransitionString = 'issue/{0}/Transitions?Expand=Transitions.fields';
 
     //current copado__project__c record id
-    public id pId;
+    public Id pId;
 
     //List of Map collector to be able to return records from json response to batch class
-    public List<Map<string,string>> userStoryList {get{
-        if(null == userStoryList){
-            userStoryList = new List<Map<string,string>>();
+    public List<Map<String,String>> userStoryList {
+        get {
+            if(null == userStoryList){
+                userStoryList = new List<Map<String,String>>();
+            }
+            return userStoryList;
         }
-        return userStoryList;
-    }set;}
+        set;
+    }
 
     //salesforce field api to third party field Mapping to use on third party record update operation
-    public Map<string,string> fieldMap {get{
-        if(null == fieldMap){
-            fieldMap = Utilities.returnFieldMap(pId,' and Exclude_from_tpu__c = false');
+    public Map<String,String> fieldMap {
+        get {
+            if(null == fieldMap){
+                fieldMap = Utilities.returnFieldMap(pId,' and Exclude_from_tpu__c = false');
+            }
+            return fieldMap;
         }
-        return fieldMap;
-    }set;}
+        set;
+    }
 
     //salesforce field api to third party field type Mapping to use on third party record update operation
-    //exps: copado__status__c => object
-    public Map<string,string> typeMap {get{
-        if(null == typeMap){
-            typeMap = Utilities.returnTargetTypeMap(pId,' and Exclude_from_tpu__c = false');
+    //exps: copado__status__c => Object
+    public Map<String,String> typeMap {
+        get{
+            if(null == typeMap){
+                typeMap = Utilities.returnTargetTypeMap(pId,' and Exclude_from_tpu__c = false');
+            }
+            return typeMap;
         }
-        return typeMap;
-    }set;}
+        set;
+    }
 
-    //string comma seperated queries to us on sObject record query on updateRecord method
-    public string queryFields {get{
-        if(string.isBlank(queryFields)){
-            queryFields = string.join(new List<string>(fieldMap.keyset()),',');
+    //String comma seperated queries to us on sObject record query on updateRecord method
+    public String queryFields {
+        get {
+            if(String.isBlank(queryFields)){
+                queryFields = String.join(new List<String>(fieldMap.keyset()),',');
+            }
+            return queryFields;
         }
-        return queryFields;
-    }set;}
-
-    //updates single record based on the external id on JIRA
-    //this method will be triggered by the SendUpdatedValues2TP process on user story status change.
-    //You can clone the proces and change the firing conditions anytime
-    public void updateRecord(copado__user_story__c usItem){
+        set;
+    }
+    
+    /**
+     * Updates single record based on external Id on Jira.
+     * This method will be triggered by the SendUpdatedValues2TP Process Builder Flow on User Story change criteria (customizable in the flow).
+     *
+     * @param usItem
+     */
+    public void updateRecord(copado__User_Story__c usItem){
         pId = usItem.copado__Project__c;
         projectExtId = usItem.copado__Project__r.Project_External_Id__c;
         namedCredential = usItem.copado__Project__r.Copado_Integration_Setting__r.Named_Credential__c;
-        id usId = usItem.id;
-        sObject cUserStory = database.query('select '+queryFields+',external_id__c,enable_logs__c from copado__user_story__c where id=:usId');
-        string finalJson = JsonTemplateOuter;
-        for(string s:fieldMap.keyset()){
+        Id usId = usItem.Id;
+        sObject cUserStory = database.query('SELECT '+queryFields+',External_Id__c,Enable_Logs__c FROM copado__User_Story__c WHERE Id=:usId');
+        String finalJson = JsonTemplateOuter;
+        for(String s:fieldMap.keyset()){
             if(null != cUserStory.get(s) && fieldMap.get(s) != 'status'){
-                finalJson += string.format((typeMap.get(s) == 'object' ? JsonTemplateInnerObject : JsonTemplateInnerString), new List<string>{fieldMap.get(s), string.escapeSingleQuotes(string.valueOf(cUserStory.get(s)))}) + ',';
+                finalJson += String.format((typeMap.get(s) == 'Object' ? JsonTemplateInnerObject : JsonTemplateInnerString), new List<String>{fieldMap.get(s), String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + ',';
             }
         }
-        //callout body to update JIRA record which is created from field mappings under related project and current field values
+        //callout body to update Jira record which is created from field mappings under related project and current field values
         finalJson = Utilities.replaceFromCurly(finalJson.substring(0,finalJson.length()-1) + '}}');
 
-        string responseText = Utilities.MakeCallout(namedCredential,'','',string.format(updateParameter4TransitionString,new List<string>{(string)cUserStory.get('External_Id__c')}),'',new List<string>{contentTypeHeader},Method.GET,null,cUserStory,null);
-        //JIRA status update on a different method, since status is a state, not a field on JIRA
+        String responseText = Utilities.MakeCallout(namedCredential,'','',String.format(updateParameter4TransitionString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.GET,null,cUserStory,null);
+        //Jira status update on a different method, since status is a state, not a field on Jira
         updateStatus(responseText,cUserStory);
 
         //callout for field update
-        string responseTextFields = Utilities.MakeCallout(namedCredential,'','',string.format(updateParameterString,new List<string>{(string)cUserStory.get('External_Id__c')}),'',new List<string>{contentTypeHeader},Method.PUT,finalJson,cUserStory,null);
-        utilities.createLogRecords();
+        String responseTextFields = Utilities.MakeCallout(namedCredential,'','',String.format(updateParameterString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.PUT,finalJson,cUserStory,null);
+        Utilities.createLogRecords();
     }
-    //fetched records from JIRA as Json
-    public List<Map<string,string>> fetchRecords(copado__Project__c selectedProject){
+    
+    /**
+     * Fetches records from Jira in JSON format
+     *
+     * @param selectedProject
+     *
+     * @return List<Map<String,String>>
+     */
+    public List<Map<String,String>> fetchRecords(copado__Project__c selectedProject){
         pid = selectedProject.id;
         projectExtId = selectedProject.Project_External_Id__c;
         namedCredential = selectedProject.Copado_Integration_Setting__r.Named_Credential__c;
-        integer startIndex = 0;
-        boolean shouldContinue = true;
-        integer total;
-        //gets issues via jqr
+        Integer startIndex = 0;
+        Boolean shouldContinue = true;
+        Integer total;
+        //Gets issues via JQR
         while(shouldContinue) {
-            string responseText = Utilities.MakeCallout(namedCredential, '', projectExtId, authQueryPath, '&startAt=' + startIndex, new List<string>{
+            String responseText = Utilities.MakeCallout(namedCredential, '', projectExtId, authQueryPath, '&startAt=' + startIndex, new List<String>{
                     contentTypeHeader
             }, Method.GET, null, null, selectedProject);
             Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(responseText);
+            //Pagination variables, Jira fetch is limited to 50 records by default
             total = Integer.valueOf(results.get('total'));
             startIndex = Integer.valueOf(results.get('startAt'));
-            System.debug('Total number of issues: ' + total);
             List<Object> issues = (List<Object>) results.get('issues');
-            Map<string, string> keyValuepairTempMap;
+            Map<String, String> keyValuepairTempMap;
             for (Object issue : issues) {
-                keyValuepairTempMap = new Map<string, string>();
-                Map<string, Object> currentIssue = (Map<string, object>) issue;
-                //below three rows are in use for look up and external id purpose
-                keyValuepairTempMap.put('key', (string) currentIssue.get('key'));
-                keyValuepairTempMap.put('id', (string) currentIssue.get('id'));
+                keyValuepairTempMap = new Map<String, String>();
+                Map<String, Object> currentIssue = (Map<String, Object>) issue;
+                //Below three rows are in use for look up and external id purpose
+                keyValuepairTempMap.put('key', (String) currentIssue.get('key'));
+                keyValuepairTempMap.put('id', (String) currentIssue.get('id'));
                 keyValuepairTempMap.put('projectid', pid);
                 if (null != currentIssue.get('fields')) {
-                    Map<string, object> fields = (Map<string, object>) currentIssue.get('fields');
-                    for (string cf : fields.keySet()) {
-                        //prepares values from string
-                        if (fields.get(cf) instanceof string || fields.get(cf) == null) {
-                            keyValuepairTempMap.put(cf, (string) fields.get(cf));
+                    Map<String, Object> fields = (Map<String, Object>) currentIssue.get('fields');
+                    for (String cf : fields.keySet()) {
+                        //Prepares values from String
+                        if (fields.get(cf) instanceof String || fields.get(cf) == null) {
+                            keyValuepairTempMap.put(cf, (String) fields.get(cf));
                         }
-                        //prepares values from Json object
-                        else if (fields.get(cf) instanceof Map<string, object>) {
-                            Map<string, object> tempObject = (Map<string, object>) fields.get(cf);
+                        //Prepares values from Json Object
+                        else if (fields.get(cf) instanceof Map<String, Object>) {
+                            Map<String, Object> tempObject = (Map<String, Object>) fields.get(cf);
                             if (null != tempObject.get('emailAddress')) {
-                                //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
-                                string cuEmail = (string) tempObject.get('emailAddress');
+                                //Fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
+                                String cuEmail = (String) tempObject.get('emailAddress');
                                 if (cf == 'assignee' && Utilities.userMap.containsKey(cuEmail)) {
                                     keyValuepairTempMap.put('developer', utilities.userMap.get(cuEmail));
-                                } else keyValuepairTempMap.put(cf, (string) tempObject.get('emailAddress'));
+                                } else keyValuepairTempMap.put(cf, (String) tempObject.get('emailAddress'));
                             } else if (null != tempObject.get('name')) {
-                                keyValuepairTempMap.put(cf, (string) tempObject.get('name'));
+                                keyValuepairTempMap.put(cf, (String) tempObject.get('name'));
                             }
                         }
                     }
@@ -155,34 +176,42 @@ public with sharing class JiraIntegration implements IIntegration{
             }else startIndex = startIndex + 50;
         }
         utilities.createLogRecords();
-        //returns list to executeUserStoryUpsert batch class
+        //Returns list to executeUserStoryUpsert batch class
         return this.userStoryList;
     }
-    //updates JIRA status
-    public void updateStatus(string responseText,sObject cUserStory){
-        string statusfinalJson = '';
+
+    /**
+     * Updates Jira fields
+     *
+     * @param responseText
+     * @param cUserStory
+     */
+    public void updateStatus(String responseText, sObject cUserStory){
+        String statusfinalJson = '';
         JSONParser parser = JSON.createParser(responseText);
-        //wrapper class direct parse
-        transitionWrapper transitionWrapperItem = (transitionWrapper)parser.readValueAs(transitionWrapper.class);
-        string currentStatusValue = (string)cUserStory.get('copado__status__c');
-        boolean calloutFlag = false;
-        for(transitions tw:transitionWrapperItem.transitions){
-            //checks if the current status is available on JIRA workflow, if not, does not do the callout
+        //Wrapper class direct parse
+        TransitionWrapper transitionWrapperItem = (TransitionWrapper)parser.readValueAs(TransitionWrapper.class);
+        String currentStatusValue = (String)cUserStory.get('copado__Status__c');
+        Boolean calloutFlag = false;
+        for(Transitions tw:transitionWrapperItem.Transitions){
+            //Checks if the current status is available on Jira workflow, if not, does not do the callout
             if(tw.name.toLowerCase() == currentStatusValue.toLowerCase()){
-                statusfinalJson = Utilities.replaceFromCurly(string.format(transitionTemplate,new List<string>{tw.id}));
+                statusfinalJson = Utilities.replaceFromCurly(String.format(transitionTemplate,new List<String>{tw.id}));
                 calloutFlag = true;
                 break;
             }
         }
-        if(calloutFlag) Utilities.MakeCallout(namedCredential,'','',string.format(updateParameter4TransitionString,new List<string>{(string)cUserStory.get('External_Id__c')}),'',new List<string>{contentTypeHeader},Method.POST,statusfinalJson,cUserStory,null);
+        if(calloutFlag) Utilities.MakeCallout(namedCredential,'','',String.format(updateParameter4TransitionString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.POST,statusfinalJson,cUserStory,null);
     }
 
-    //Wrapper classes for direct casting of transition Callout response
-    public class transitionWrapper{
-        public List<transitions> transitions;
+    /**
+     * Wrapper classes for direct casting of Transition Callout response
+     */
+    public class TransitionWrapper {
+        public List<Transitions> Transitions;
     }
-    public class transitions{
-        public string id;
-        public string name;
+    public class Transitions {
+        public String id;
+        public String name;
     }
 }

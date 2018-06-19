@@ -1,8 +1,11 @@
 /**
- * Created by umitcanuckan on 05/06/2018.
+ * Integration Interface.
+ *
+ * @author Ümit Can Uçkan
+ * @version 1.0
+ * @since CCM Integrations 1.0
  */
-
 public interface IIntegration {
-    List<Map<string,string>> fetchRecords(copado__Project__c selectedProject);
-    void updateRecord(copado__user_story__c usItem);
+    List<Map<String,String>> fetchRecords(copado__Project__c selectedProject);
+    void updateRecord(copado__User_Story__c usItem);
 }

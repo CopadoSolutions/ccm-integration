@@ -6,7 +6,7 @@ The latest version supports JIRA and Microsoft VSTS.
 If your provider is not one of these, check out this other repository: https://github.com/CopadoSolutions/CopadoIntegrations
 
 # How does it work?
-Copado Solutions has built the authentication module as well as the framework for retrieving user stories and inserting these into the Copado sObject called, "User Story" and synchronizing them with the external provider when changes are detected.  The field mapping is also handled by the integration process.  Both, the data being queried from the data source as well as the mapping, can be modified by users depending on their needs.  
+Copado Solutions has built the authentication module as well as the framework for retrieving user stories and inserting these into the Copado sObject called, "User Story" and synchronizing them with the external provider when changes are detected.  The field mapping is also handled by the integration process. Both, the data being queried from the data source as well as the mapping, can be modified by users depending on their needs.  
 
 We have commented the code with instructions to help with the customization process.
 
@@ -16,15 +16,14 @@ Installation instructions can be found below.
 
 # Installation instructions
 To install the application, use one of the below URLs:
-- Production/Developer orgs:  -----------------------------------------
-- Sandbox orgs: --------------------------------------
+- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3r0
+- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3r0
 
 # Getting started with Copado Change Management Integrations
-
 In order to customize your integration, follow these steps:
 
 1) Create a Named Credentials record in Setup > Security > Named Credentials.
-Here, you will personalize your credentials with the authorization to the external system. To do that, create a new record for the named credentials, provide a name, the EndPoint URL and the fields for basic authentication.
+Here, you will personalize your credentials with the authorization to the external system. To do that, create a new record for the Named Credentials, provide a Name, the EndPoint URL and the fields for basic authentication.
 
 - A Jira endpoint might look as follows: https://COMPANY_DOMAIN_NAME.atlassian.net/rest/api/2/
 
@@ -35,8 +34,8 @@ Note: For Microsoft VSTS, it is required to provide your personal access token i
 
 2) In Copado Integration Settings tab, create a new record with your external provider. During the record creation, provide a name (Copado Integration Setting Name field), select a provider from the picklist (External System field) and type the Named Credential you have just created (Named Credential field). It is very important to type the Named Credentials correctly since Named Credentials cannot be located through a lookup field.
 
-3) Create a new Project to include all the user stories that will be synchronized.
-Go to Projects tab in Copado Change Management application and create a project for your user stories. Provide a name for it, your external provider’s project id (Project External Id field), provide also Workspace Id for Microsoft VSTS using the Query Id (found in the address bar as a parameter)  and select the Copado Integration Setting you have just created for your external provider.
+3) Create a new Project to include all the User Stories that will be synchronized.
+Go to Projects tab in Copado Change Management application and create a Project for your User Stories. Provide a Name for it, your external provider’s Project Id (Project External Id field), provide also Workspace Id for Microsoft VSTS using the Query Id (found in the address bar as a parameter - a VSTS Query Id might look as follows: bd7cae54-f1d1-4687-b313-0c64ecdfe731)  and select the Copado Integration Setting you have just created for your external provider.
 
 4) Set the fields mappings for the integration.
 Within the Field Mapping related list of your integration project, you can add as many field mappings as you wish. 
@@ -52,11 +51,15 @@ Optional fields:
 - Target Field Type. String or object types. This type is used for the JSON file creation.
 
 ### Mandatory Field Mapping records for both JIRA and VSTS:
+      Salesforce_Field_Name__c | Third_Party_Field_Name__c | Exclude_from_tpu__c
+-       copado__Project__c 		         projectId 		                true
+-       External_Id__c        	  	      id                 true(false for VSTS)
 
-Salesforce_Field_Name__c | Third_Party_Field_Name__c | Exclude_from_tpu__c
--       copado__Project__c 		   projectId 		 true
--       External_Id__c        	  	id               true(False for VSTS)
-
+## Fields mapping by default
+In this repository you will find two files to be uploaded to your Salesforce Org. They contain a set of fields by default for both providers for an easy and quick setup. 
+These files are:
+JIRA_Default_Field_Mappings.csv
+VSTS_Default_Field_Mappings.csv
 
 ## New Apex Class - ScheduleUserStoryFetch 
 The new class ScheduleUserStoryFetch has been created to perform a bulk from the external provider to Salesforce. Depending on the configuration of its cron expression, it will carry out the bulk operation periodically. It will retrieve all the mapped fields and will update the Salesforce fields with the external data.
@@ -64,14 +67,7 @@ The new class ScheduleUserStoryFetch has been created to perform a bulk from the
 ## New Process Builder Flow - SendUpdatedValues2TP
 A new Process Builder Flow has been created for updating changes in User Stories on the external provider. It is executed every time a change in a User Story is detected and will send the modified fields to the external object fields.
 
-This Process Builder Flow is included as a template, but deactivated. Activating it will start sending updates to the External System on User Story Status change. Criteria may be modified or extended as per the customer requirements.
-
-## Fields mapping by default
-In this repository you will find 2 files to be uploaded to your Salesforce Org. They contain a set of fields by default for both providers. 
-These files are:
-JIRA Default Field Mappings.numbers
-VSTS Default Field Mappings.numbers
-
+This Process Builder Flow is included as a template, and Active. Criteria may be modified or extended as per the customer requirements by versioning this Process Builder Flow. **Deactivating this Process Builder Flow may take the code coverage under deployment threshold.**
 
 ## Callout Logs
 On the User Story and the Project, there is a checkbox labelled as “Enable Logs” to add to the US or Project layout the logs created from that moment on. It is unchecked by default.
@@ -85,6 +81,11 @@ Some considerations when reading the logs:
 - At fetch level, VSTS performs 2 callouts.
 
 This logging system was implemented to handle the characteristics of this integration (future callouts) for a better error handling.
+
+## Best Practices recommendation
+When you are integrating Copado User Stories with an external source, it is common that this external source becomes the master of some of the data being synchronized.
+We highly recommend blocking in the User Story Layout as "read-only" the fields you want your external source to be the master off, and exclude the Copado field from the synchronization in the Field Mappings Object.
+This resource will help avoiding sync conflicts while keeping the technical solution as simple as possible for a better maintenance and troubleshooting.
 
 
 

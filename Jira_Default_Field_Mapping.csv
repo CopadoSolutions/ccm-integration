@@ -1,0 +1,9 @@
+Project__c,Salesforce_Field_Name__c,Third_Party_Field_Name__c,Target_Field_Type__c,Exclude_from_su__c,Exclude_from_tpu__c
+<INSERT_PROJECT_ID>,copado__Status__c,status,object,FALSE,FALSE
+<INSERT_PROJECT_ID>,copado__Developer__c,developer,,FALSE,TRUE
+<INSERT_PROJECT_ID>,copado__Functional_Specifications__c,description,,FALSE,FALSE
+<INSERT_PROJECT_ID>,copado__User_Story_Title__c,summary,,FALSE,FALSE
+<INSERT_PROJECT_ID>,copado__userStory_Role__c,issuetype,object,FALSE,FALSE
+<INSERT_PROJECT_ID>,JIRA_Key__c,key,,FALSE,TRUE
+<INSERT_PROJECT_ID>,copado__Project__c,projectId,,FALSE,TRUE
+<INSERT_PROJECT_ID>,External_Id__c,id,,FALSE,TRUE

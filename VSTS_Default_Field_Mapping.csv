@@ -1,0 +1,10 @@
+Project__c,Salesforce_Field_Name__c,Third_Party_Field_Name__c,Target_Field_Type__c,Exclude_from_su__c,Exclude_from_tpu__c
+<INSERT_PROJECT_ID>,copado__Functional_Specifications__c,System.Reason,,FALSE,FALSE
+<INSERT_PROJECT_ID>,copado__Project__c,projectId,,FALSE,TRUE
+<INSERT_PROJECT_ID>,copado__User_Story_Title__c,System.Title,,FALSE,FALSE
+<INSERT_PROJECT_ID>,recordTypeId,recordTypeId,,FALSE,TRUE
+<INSERT_PROJECT_ID>,External_Id__c,id,,FALSE,FALSE
+<INSERT_PROJECT_ID>,copado__Developer__c,developer,,FALSE,TRUE
+<INSERT_PROJECT_ID>,copado__Story_Points_SFDC__c,Microsoft.VSTS.Scheduling.StoryPoints,,FALSE,FALSE
+<INSERT_PROJECT_ID>,copado__Status__c,System.State,,FALSE,FALSE
+<INSERT_PROJECT_ID>,copado__Priority__c,Microsoft.VSTS.Common.Priority,,FALSE,FALSE

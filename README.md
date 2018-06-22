@@ -64,6 +64,13 @@ VSTS_Default_Field_Mappings.csv
 ## New Apex Class - ScheduleUserStoryFetch 
 The new class ScheduleUserStoryFetch has been created to perform a bulk from the external provider to Salesforce. Depending on the configuration of its cron expression, it will carry out the bulk operation periodically. It will retrieve all the mapped fields and will update the Salesforce fields with the external data.
 
+Sample on how to schedule the fetch process:
+```
+ ScheduleUserStoryFetch Susf = new ScheduleUserStoryFetch (prpjectRecordId);
+ String str = Datetime.now().addSeconds(5).format('s m H d M ? yyyy');
+ String jobID = system.schedule('ScheduleUserStoryFetch - ' + DateTime.Now() + '.' + math.mod(DateTime.now().getTime(), 1000), str, Susf);
+```
+
 ## New Process Builder Flow - SendUpdatedValues2TP
 A new Process Builder Flow has been created for updating changes in User Stories on the external provider. It is executed every time a change in a User Story is detected and will send the modified fields to the external object fields.
 

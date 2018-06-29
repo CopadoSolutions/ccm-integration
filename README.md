@@ -94,7 +94,8 @@ When you are integrating Copado User Stories with an external source, it is comm
 We highly recommend blocking in the User Story Layout as "read-only" the fields you want your external source to be the master off, and exclude the Copado field from the synchronization in the Field Mappings Object.
 This resource will help avoiding sync conflicts while keeping the technical solution as simple as possible for a better maintenance and troubleshooting.
 
-
-
+# Important Note
+-To be able to update JIRA fields from Salesforce, fields you want to update must be on the layout screens.
+-Go to https://<your url>/plugins/servlet/project-config/<projectKey>/screens, click to screen that you want to edit and add your fields to create, edit, view screens.
 
 

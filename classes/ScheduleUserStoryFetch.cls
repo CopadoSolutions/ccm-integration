@@ -9,7 +9,7 @@ global class ScheduleUserStoryFetch implements Schedulable
 {
     copado__Project__c cpRecord;
     public ScheduleUserStoryFetch(Id pId){
-        cpRecord = [SELECT Id,Name, Copado_Integration_Setting__r.External_System__c, Copado_Integration_Setting__r.Named_Credential__c,Enable_Logs__c,
+        cpRecord = [SELECT Id,Name, Copado_Integration_Setting__r.External_System__c, Copado_Integration_Setting__r.Named_Credential__c,JQL_Extended_Filter__c,Enable_Logs__c,
                            Project_External_Id__c, Workspace_Id__c FROM copado__Project__c WHERE Id=:pId];
     }
 

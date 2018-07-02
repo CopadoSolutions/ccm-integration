@@ -67,18 +67,18 @@ public with sharing class Utilities {
         Schema.SObjectField field = M.get(fname);
         String FldType = String.valueOf(field.getDescribe().getType()).toLowerCase();
         if (FldType == 'textarea' || FldType == 'picklist' || fldType == 'reference') {
-            FldType = 'String';
+            FldType = 'string';
         }
-        if(FldType == 'Boolean')  return Boolean.valueOf(param);
-        if(FldType == 'String')   return String.valueOf(param);
-        if(FldType == 'blob')     return (blob)param;
-        if(FldType == 'date')     return Date.valueOf(param);
-        if(FldType == 'datetime') return Datetime.valueOf(param);
-        if(FldType == 'time')     return (time)param;
-        if(FldType == 'integer')  return Integer.valueOf(param);
-        if(FldType == 'long')     return (long)param;
-        if(FldType == 'decimal')  return (decimal)param;
-        if(FldType == 'double')   return Double.valueOf(param);
+        if(FldType == 'boolean')            return Boolean.valueOf(param);
+        if(FldType == 'string')             return String.valueOf(param);
+        if(FldType == 'blob')               return (Blob)param;
+        if(FldType == 'date')               return Date.valueOf(param);
+        if(FldType == 'datetime')           return Datetime.valueOf(param);
+        if(FldType == 'time')               return (Time)param;
+        if(FldType == 'integer')            return Integer.valueOf(param);
+        if(FldType == 'long')               return (Long)param;
+        if(FldType == 'decimal')            return (Decimal)param;
+        if(FldType == 'double')             return Double.valueOf(param);
         return null;
     }
     //usermap to match lookup values via third party users' mail addresses

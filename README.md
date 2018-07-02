@@ -5,6 +5,11 @@ Copado Solutions can integrate your external project management systems with Cop
 The latest version supports JIRA and Microsoft VSTS.
 If your provider is not one of these, check out this other repository: https://github.com/CopadoSolutions/CopadoIntegrations
 
+# Copado Change Management Integrations v1.3 update (07-02-2018)
+- Added support for external Integers migration.
+- Added support for JQL extended queries in Jira.
+
+
 # How does it work?
 Copado Solutions has built the authentication module as well as the framework for retrieving user stories and inserting these into the Copado sObject called, "User Story" and synchronizing them with the external provider when changes are detected.  The field mapping is also handled by the integration process. Both, the data being queried from the data source as well as the mapping, can be modified by users depending on their needs.  
 
@@ -16,8 +21,8 @@ Installation instructions can be found below.
 
 # Installation instructions
 To install the application, use one of the below URLs:
-- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3r0
-- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3r0
+- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3z0
+- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3z0
 
 # Getting started with Copado Change Management Integrations
 In order to customize your integration, follow these steps:

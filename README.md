@@ -8,11 +8,14 @@ If your provider is not one of these, check out this other repository: https://g
 # Copado Change Management Integrations v1.3 update (07-02-2018)
 - Added support for external Integers migration.
 - Added support for JQL extended queries in Jira.
+
 **Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
-- JQL_Extended_Filter__c custom field.
-- JiraIntegration class
-- Utilities class
-- ScheduleUserStoryFetch class
+```
+JQL_Extended_Filter__c custom field
+JiraIntegration class
+Utilities class
+ScheduleUserStoryFetch class
+```
 
 
 # How does it work?

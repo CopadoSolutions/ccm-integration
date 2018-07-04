@@ -14,6 +14,12 @@ public with sharing class JiraIntegration implements IIntegration {
     //will be filled with related project/user Story record
     public String projectExtId;
     public String namedCredential;
+    public String jqlExtFilter {get{
+        if(String.isBlank(jqlExtFilter)){
+            jqlExtFilter = '';
+        }
+        return jqlExtFilter;
+    } private set;}
 
     //endpoint path to fetch records from Jira
     public final String authQueryPath = 'search?jql=project=';
@@ -26,6 +32,8 @@ public with sharing class JiraIntegration implements IIntegration {
     public final String JsonTemplateInnerObject = '"{0}" :lcurly"name" : "{1}"rcurly';
     //Json template to use on String.format function for String types
     public final String JsonTemplateInnerString = '"{0}" :"{1}"';
+    //Json template to use on String.format function for Integer types
+    public final String JsonTemplateInnerInteger = '"{0}" :{1}';
     public final String JsonTemplateOuter = '{"fields" : {';
 
     //template to be able to change the status via transition
@@ -35,7 +43,7 @@ public with sharing class JiraIntegration implements IIntegration {
     //endpoint path to reach to specified issue
     public String updateParameterString = 'issue/{0}';
     //endpoint path to fetch available statuses on related issue
-    public String updateParameter4TransitionString = 'issue/{0}/Transitions?Expand=Transitions.fields';
+    public String updateParameter4TransitionString = 'issue/{0}/transitions?Expand=transitions.fields';
 
     //current copado__project__c record id
     public Id pId;
@@ -84,7 +92,7 @@ public with sharing class JiraIntegration implements IIntegration {
         }
         set;
     }
-    
+
     /**
      * Updates single record based on external Id on Jira.
      * This method will be triggered by the SendUpdatedValues2TP Process Builder Flow on User Story change criteria (customizable in the flow).
@@ -100,12 +108,11 @@ public with sharing class JiraIntegration implements IIntegration {
         String finalJson = JsonTemplateOuter;
         for(String s:fieldMap.keyset()){
             if(null != cUserStory.get(s) && fieldMap.get(s) != 'status'){
-                finalJson += String.format((typeMap.get(s) == 'Object' ? JsonTemplateInnerObject : JsonTemplateInnerString), new List<String>{fieldMap.get(s), String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + ',';
+                finalJson += String.format((typeMap.get(s) == 'object' ? JsonTemplateInnerObject : (typeMap.get(s) == 'integer' ? JsonTemplateInnerInteger : JsonTemplateInnerString)), new List<String>{fieldMap.get(s), String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + ',';
             }
         }
         //callout body to update Jira record which is created from field mappings under related project and current field values
         finalJson = CopadoCCMutilities.replaceFromCurly(finalJson.substring(0,finalJson.length()-1) + '}}');
-
         String responseText = CopadoCCMutilities.MakeCallout(namedCredential,'','',String.format(updateParameter4TransitionString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.GET,null,cUserStory,null);
         //Jira status update on a different method, since status is a state, not a field on Jira
         updateStatus(responseText,cUserStory);
@@ -114,7 +121,7 @@ public with sharing class JiraIntegration implements IIntegration {
         String responseTextFields = CopadoCCMutilities.MakeCallout(namedCredential,'','',String.format(updateParameterString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.PUT,finalJson,cUserStory,null);
         CopadoCCMutilities.createLogRecords();
     }
-    
+
     /**
      * Fetches records from Jira in JSON format
      *
@@ -126,12 +133,21 @@ public with sharing class JiraIntegration implements IIntegration {
         pid = selectedProject.id;
         projectExtId = selectedProject.Project_External_Id__c;
         namedCredential = selectedProject.Copado_Integration_Setting__r.Named_Credential__c;
+
+        if(String.isNotBlank(selectedProject.JQL_Extended_Filter__c)){
+            if(selectedProject.JQL_Extended_Filter__c.length() >= 3) {
+                if (selectedProject.JQL_Extended_Filter__c.toLowercase().replace(' ', '').substring(0, 3) != 'and') jqlExtFilter = ' AND ';
+                jqlExtFilter += selectedProject.JQL_Extended_Filter__c;
+                jqlExtFilter = jqlExtFilter.replace(' ', '%20');
+            }
+        }
+
         Integer startIndex = 0;
         Boolean shouldContinue = true;
         Integer total;
         //Gets issues via JQR
         while(shouldContinue) {
-            String responseText = CopadoCCMutilities.MakeCallout(namedCredential, '', projectExtId, authQueryPath, '&startAt=' + startIndex, new List<String>{
+            String responseText = CopadoCCMutilities.MakeCallout(namedCredential, '', projectExtId+jqlExtFilter, authQueryPath, '&startAt=' + startIndex, new List<String>{
                     contentTypeHeader
             }, Method.GET, null, null, selectedProject);
             Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(responseText);
@@ -151,8 +167,8 @@ public with sharing class JiraIntegration implements IIntegration {
                     Map<String, Object> fields = (Map<String, Object>) currentIssue.get('fields');
                     for (String cf : fields.keySet()) {
                         //Prepares values from String
-                        if (fields.get(cf) instanceof String || fields.get(cf) == null) {
-                            keyValuepairTempMap.put(cf, (String) fields.get(cf));
+                        if (fields.get(cf) instanceof String || fields.get(cf) instanceof Integer || fields.get(cf) instanceof Decimal || fields.get(cf) instanceof Double || fields.get(cf) == null) {
+                            keyValuepairTempMap.put(cf, String.valueOf(fields.get(cf)));
                         }
                         //Prepares values from Json Object
                         else if (fields.get(cf) instanceof Map<String, Object>) {

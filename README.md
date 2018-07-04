@@ -29,8 +29,8 @@ Installation instructions can be found below.
 
 # Installation instructions
 To install the application, use one of the below URLs:
-- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3z0
-- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U3z0
+- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U4VH
+- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001U4VH
 
 # Getting started with Copado Change Management Integrations
 In order to customize your integration, follow these steps:

@@ -13,7 +13,7 @@
      //Field mapping values between salesforce and third party platform fields under related project
      global Map<String,String> fieldMap {get{
          if(null == fieldMap){
-             fieldMap = Utilities.returnFieldMap(gProject.Id,' and Exclude_from_su__c = false');
+             fieldMap = CopadoCCMutilities.returnFieldMap(gProject.Id,' and Exclude_from_su__c = false');
          }
          return fieldMap;
      }set;}
@@ -37,7 +37,7 @@
                  s = s.toLowerCase();
                  //puts the value on sf Object if the current user story item value Map stores current field Map keyset
                  if(tempMap.containsKey(fieldMap.get(s))){
-                     sobj.put(s,Utilities.returnCastedValue(tempMap.get(fieldMap.get(s)),s));
+                     sobj.put(s,CopadoCCMutilities.returnCastedValue(tempMap.get(fieldMap.get(s)),s));
                  }
              }
              userStories2Upsert.add((copado__User_Story__c)sobj);

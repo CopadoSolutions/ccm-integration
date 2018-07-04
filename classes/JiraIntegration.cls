@@ -14,12 +14,6 @@ public with sharing class JiraIntegration implements IIntegration {
     //will be filled with related project/user Story record
     public String projectExtId;
     public String namedCredential;
-    public String jqlExtFilter {get{
-        if(String.isBlank(jqlExtFilter)){
-            jqlExtFilter = '';
-        }
-        return jqlExtFilter;
-    } private set;}
 
     //endpoint path to fetch records from Jira
     public final String authQueryPath = 'search?jql=project=';
@@ -32,8 +26,6 @@ public with sharing class JiraIntegration implements IIntegration {
     public final String JsonTemplateInnerObject = '"{0}" :lcurly"name" : "{1}"rcurly';
     //Json template to use on String.format function for String types
     public final String JsonTemplateInnerString = '"{0}" :"{1}"';
-    //Json template to use on String.format function for Integer types
-    public final String JsonTemplateInnerInteger = '"{0}" :{1}';
     public final String JsonTemplateOuter = '{"fields" : {';
 
     //template to be able to change the status via transition
@@ -43,7 +35,7 @@ public with sharing class JiraIntegration implements IIntegration {
     //endpoint path to reach to specified issue
     public String updateParameterString = 'issue/{0}';
     //endpoint path to fetch available statuses on related issue
-    public String updateParameter4TransitionString = 'issue/{0}/transitions?Expand=transitions.fields';
+    public String updateParameter4TransitionString = 'issue/{0}/Transitions?Expand=Transitions.fields';
 
     //current copado__project__c record id
     public Id pId;
@@ -63,7 +55,7 @@ public with sharing class JiraIntegration implements IIntegration {
     public Map<String,String> fieldMap {
         get {
             if(null == fieldMap){
-                fieldMap = Utilities.returnFieldMap(pId,' and Exclude_from_tpu__c = false');
+                fieldMap = CopadoCCMutilities.returnFieldMap(pId,' and Exclude_from_tpu__c = false');
             }
             return fieldMap;
         }
@@ -75,7 +67,7 @@ public with sharing class JiraIntegration implements IIntegration {
     public Map<String,String> typeMap {
         get{
             if(null == typeMap){
-                typeMap = Utilities.returnTargetTypeMap(pId,' and Exclude_from_tpu__c = false');
+                typeMap = CopadoCCMutilities.returnTargetTypeMap(pId,' and Exclude_from_tpu__c = false');
             }
             return typeMap;
         }
@@ -92,7 +84,7 @@ public with sharing class JiraIntegration implements IIntegration {
         }
         set;
     }
-
+    
     /**
      * Updates single record based on external Id on Jira.
      * This method will be triggered by the SendUpdatedValues2TP Process Builder Flow on User Story change criteria (customizable in the flow).
@@ -108,20 +100,21 @@ public with sharing class JiraIntegration implements IIntegration {
         String finalJson = JsonTemplateOuter;
         for(String s:fieldMap.keyset()){
             if(null != cUserStory.get(s) && fieldMap.get(s) != 'status'){
-                finalJson += String.format((typeMap.get(s) == 'object' ? JsonTemplateInnerObject : (typeMap.get(s) == 'integer' ? JsonTemplateInnerInteger : JsonTemplateInnerString)), new List<String>{fieldMap.get(s), String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + ',';
+                finalJson += String.format((typeMap.get(s) == 'Object' ? JsonTemplateInnerObject : JsonTemplateInnerString), new List<String>{fieldMap.get(s), String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + ',';
             }
         }
         //callout body to update Jira record which is created from field mappings under related project and current field values
-        finalJson = Utilities.replaceFromCurly(finalJson.substring(0,finalJson.length()-1) + '}}');
-        String responseText = Utilities.MakeCallout(namedCredential,'','',String.format(updateParameter4TransitionString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.GET,null,cUserStory,null);
+        finalJson = CopadoCCMutilities.replaceFromCurly(finalJson.substring(0,finalJson.length()-1) + '}}');
+
+        String responseText = CopadoCCMutilities.MakeCallout(namedCredential,'','',String.format(updateParameter4TransitionString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.GET,null,cUserStory,null);
         //Jira status update on a different method, since status is a state, not a field on Jira
         updateStatus(responseText,cUserStory);
 
         //callout for field update
-        String responseTextFields = Utilities.MakeCallout(namedCredential,'','',String.format(updateParameterString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.PUT,finalJson,cUserStory,null);
-        Utilities.createLogRecords();
+        String responseTextFields = CopadoCCMutilities.MakeCallout(namedCredential,'','',String.format(updateParameterString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.PUT,finalJson,cUserStory,null);
+        CopadoCCMutilities.createLogRecords();
     }
-
+    
     /**
      * Fetches records from Jira in JSON format
      *
@@ -133,21 +126,12 @@ public with sharing class JiraIntegration implements IIntegration {
         pid = selectedProject.id;
         projectExtId = selectedProject.Project_External_Id__c;
         namedCredential = selectedProject.Copado_Integration_Setting__r.Named_Credential__c;
-
-        if(String.isNotBlank(selectedProject.JQL_Extended_Filter__c)){
-            if(selectedProject.JQL_Extended_Filter__c.length() >= 3) {
-                if (selectedProject.JQL_Extended_Filter__c.toLowercase().replace(' ', '').substring(0, 3) != 'and') jqlExtFilter = ' AND ';
-                jqlExtFilter += selectedProject.JQL_Extended_Filter__c;
-                jqlExtFilter = jqlExtFilter.replace(' ', '%20');
-            }
-        }
-
         Integer startIndex = 0;
         Boolean shouldContinue = true;
         Integer total;
         //Gets issues via JQR
         while(shouldContinue) {
-            String responseText = Utilities.MakeCallout(namedCredential, '', projectExtId+jqlExtFilter, authQueryPath, '&startAt=' + startIndex, new List<String>{
+            String responseText = CopadoCCMutilities.MakeCallout(namedCredential, '', projectExtId, authQueryPath, '&startAt=' + startIndex, new List<String>{
                     contentTypeHeader
             }, Method.GET, null, null, selectedProject);
             Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(responseText);
@@ -167,8 +151,8 @@ public with sharing class JiraIntegration implements IIntegration {
                     Map<String, Object> fields = (Map<String, Object>) currentIssue.get('fields');
                     for (String cf : fields.keySet()) {
                         //Prepares values from String
-                        if (fields.get(cf) instanceof String || fields.get(cf) instanceof Integer || fields.get(cf) instanceof Decimal || fields.get(cf) instanceof Double || fields.get(cf) == null) {
-                            keyValuepairTempMap.put(cf, String.valueOf(fields.get(cf)));
+                        if (fields.get(cf) instanceof String || fields.get(cf) == null) {
+                            keyValuepairTempMap.put(cf, (String) fields.get(cf));
                         }
                         //Prepares values from Json Object
                         else if (fields.get(cf) instanceof Map<String, Object>) {
@@ -176,8 +160,8 @@ public with sharing class JiraIntegration implements IIntegration {
                             if (null != tempObject.get('emailAddress')) {
                                 //Fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
                                 String cuEmail = (String) tempObject.get('emailAddress');
-                                if (cf == 'assignee' && Utilities.userMap.containsKey(cuEmail)) {
-                                    keyValuepairTempMap.put('developer', utilities.userMap.get(cuEmail));
+                                if (cf == 'assignee' && CopadoCCMutilities.userMap.containsKey(cuEmail)) {
+                                    keyValuepairTempMap.put('developer', CopadoCCMutilities.userMap.get(cuEmail));
                                 } else keyValuepairTempMap.put(cf, (String) tempObject.get('emailAddress'));
                             } else if (null != tempObject.get('name')) {
                                 keyValuepairTempMap.put(cf, (String) tempObject.get('name'));
@@ -191,7 +175,7 @@ public with sharing class JiraIntegration implements IIntegration {
                 shouldContinue = false;
             }else startIndex = startIndex + 50;
         }
-        utilities.createLogRecords();
+        CopadoCCMutilities.createLogRecords();
         //Returns list to executeUserStoryUpsert batch class
         return this.userStoryList;
     }
@@ -212,12 +196,12 @@ public with sharing class JiraIntegration implements IIntegration {
         for(Transitions tw:transitionWrapperItem.Transitions){
             //Checks if the current status is available on Jira workflow, if not, does not do the callout
             if(tw.name.toLowerCase() == currentStatusValue.toLowerCase()){
-                statusfinalJson = Utilities.replaceFromCurly(String.format(transitionTemplate,new List<String>{tw.id}));
+                statusfinalJson = CopadoCCMutilities.replaceFromCurly(String.format(transitionTemplate,new List<String>{tw.id}));
                 calloutFlag = true;
                 break;
             }
         }
-        if(calloutFlag) Utilities.MakeCallout(namedCredential,'','',String.format(updateParameter4TransitionString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.POST,statusfinalJson,cUserStory,null);
+        if(calloutFlag) CopadoCCMutilities.MakeCallout(namedCredential,'','',String.format(updateParameter4TransitionString,new List<String>{(String)cUserStory.get('External_Id__c')}),'',new List<String>{contentTypeHeader},Method.POST,statusfinalJson,cUserStory,null);
     }
 
     /**

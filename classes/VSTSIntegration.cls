@@ -72,7 +72,7 @@ public without sharing class VSTSIntegration implements IIntegration{
     public Map<String,String> fieldMap {
         get {
             if(null == fieldMap){
-                fieldMap = Utilities.returnFieldMap(pId,' and Exclude_from_tpu__c = false');
+                fieldMap = CopadoCCMutilities.returnFieldMap(pId,' and Exclude_from_tpu__c = false');
             }
             return fieldMap;
         }
@@ -113,8 +113,8 @@ public without sharing class VSTSIntegration implements IIntegration{
         finalJson = finalJson.substring(0,finalJson.length()-2) + ']';
         namedCredential = usItem.copado__Project__r.Copado_Integration_Setting__r.Named_Credential__c;
         //callout for field update
-        String responseText = Utilities.MakeCallout(namedCredential,workspacePath2Patch,authApiVersion,(String)cUserStory.get('External_Id__c'),'',new List<String>{contentTypeHeader4Patch,connectionHeader,overridePostMethod},Method.POST,finalJson,cUserStory,null);
-        Utilities.createLogRecords();
+        String responseText = CopadoCCMutilities.MakeCallout(namedCredential,workspacePath2Patch,authApiVersion,(String)cUserStory.get('External_Id__c'),'',new List<String>{contentTypeHeader4Patch,connectionHeader,overridePostMethod},Method.POST,finalJson,cUserStory,null);
+        CopadoCCMutilities.createLogRecords();
     }
 
     /**
@@ -130,7 +130,7 @@ public without sharing class VSTSIntegration implements IIntegration{
         workspaceId = selectedProject.Workspace_Id__c;
         namedCredential = selectedProject.Copado_Integration_Setting__r.Named_Credential__c;
         //callout to find ids of the WorkItems exist on VSTS
-        String responseText = Utilities.MakeCallout(namedCredential,projectExtId,workspaceId,authQueryPath,authApiVersion,new List<String>{contentTypeHeader},Method.GET,null,null,selectedProject);
+        String responseText = CopadoCCMutilities.MakeCallout(namedCredential,projectExtId,workspaceId,authQueryPath,authApiVersion,new List<String>{contentTypeHeader},Method.GET,null,null,selectedProject);
         JSONParser parser = JSON.createParser(responseText);
         //wrapper class direct parse
         authWrapper authWrapperItem = (authWrapper)parser.readValueAs(authWrapper.class);
@@ -138,7 +138,7 @@ public without sharing class VSTSIntegration implements IIntegration{
             wIIds.add(String.valueOf(wiw.Id));
         }
         //callout to have all fields for desired workItems
-        String responseText2 = Utilities.MakeCallout(namedCredential,projectExtId,String.join(wIIds,','),workspacePath,'',new List<String>{contentTypeHeader,connectionHeader},Method.GET,null,null,selectedProject);
+        String responseText2 = CopadoCCMutilities.MakeCallout(namedCredential,projectExtId,String.join(wIIds,','),workspacePath,'',new List<String>{contentTypeHeader,connectionHeader},Method.GET,null,null,selectedProject);
         JSONParser parser2 = JSON.createParser(responseText2);
         //wrapper class direct parse
         VSTSIntegration.queryWrapper queryWrapperItem = (VSTSIntegration.queryWrapper)parser2.readValueAs(VSTSIntegration.queryWrapper.class);
@@ -153,8 +153,8 @@ public without sharing class VSTSIntegration implements IIntegration{
                 else if(s == 'System.AssignedTo' && vw.fields.get(s).contains('<')){
                     //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
                     String cuEmail = vw.fields.get(s).subStringAfter('<').subStringBefore('>');
-                    if(Utilities.userMap.containsKey(cuEmail)){
-                        vw.fields.put('developer',Utilities.userMap.get(cuEmail));
+                    if(CopadoCCMutilities.userMap.containsKey(cuEmail)){
+                        vw.fields.put('developer',CopadoCCMutilities.userMap.get(cuEmail));
                     }
                 }
                 else vw.fields.put(s.toLowerCase(),vw.fields.get(s).toLowerCase());
@@ -165,7 +165,7 @@ public without sharing class VSTSIntegration implements IIntegration{
             vw.fields.put('rev',String.valueOf(vw.rev));
             vw.fields.put('projectid',pid);
         }
-        utilities.createLogRecords();
+        CopadoCCMutilities.createLogRecords();
         //returns list to executeUserStoryUpsert batch class
         return this.userStoryList;
     }

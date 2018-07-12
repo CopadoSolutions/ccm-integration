@@ -91,6 +91,7 @@ This Process Builder Flow is included as a template, and Active. Criteria may be
 
 ## Callout Logs
 On the User Story and the Project, there is a checkbox labelled as “Enable Logs” to add to the US or Project layout the logs created from that moment on. It is unchecked by default.
+**If you are fetching more then 500 records from third party platform, we recommend you to disable this checkbox based on heap size consideration.**
 
 Jira sends 204 code when Salesforce sends a record and the operation was successful (instead of the usual 200 code). 
 

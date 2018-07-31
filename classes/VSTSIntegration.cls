@@ -11,58 +11,64 @@
 
 public without sharing class VSTSIntegration implements IIntegration{
     //will be filled with related project/user Story record
-    public string projectExtId;
-    public string workspaceId;
-    public string namedCredential;
+    public String projectExtId;
+    public String workspaceId;
+    public String namedCredential;
+    public final Integer vstsPaginationSize { get{
+        if(null == vstsPaginationSize){
+            vstsPaginationSize = 100;
+        }
+        return vstsPaginationSize;
+    }set;}
 
     //endpoint path to reach work items ids
-    public final string authQueryPath = '/_apis/wit/wiql/';
+    public final String authQueryPath = '/_apis/wit/wiql/';
     //endpoint api version
-    public final string authApiVersion = '?api-version=4.1';
+    public final String authApiVersion = '?api-version=4.1';
     //endpoint path to reach work items returned from query callout
-    public final string workspacePath = '/_apis/wit/workitems?ids=';
+    public final String workspacePath = '/_apis/wit/workitems?ids=';
     //endpoint path to use on patch operation
-    public final string workspacePath2Patch = '_apis/wit/workitems/';
+    public final String workspacePath2Patch = '_apis/wit/workitems/';
 
     //headers for callout
-    public final string contentTypeHeader = 'Content-Type:application/json';
-    public final string contentTypeHeader4Patch = 'Content-Type:application/json-patch+json';
-    public final string connectionHeader = 'Connection:keep-alive';
-    public final string overridePostMethod = 'X-HTTP-Method-Override:PATCH';
+    public final String contentTypeHeader = 'Content-Type:application/json';
+    public final String contentTypeHeader4Patch = 'Content-Type:application/json-patch+json';
+    public final String connectionHeader = 'Connection:keep-alive';
+    public final String overridePostMethod = 'X-HTTP-Method-Override:PATCH';
 
     //Json template to use on string.format function
-    public final string JsonTemplate ='"op": "add","path": "/fields/{0}","value": "{1}"';
+    public final String JsonTemplate ='"op": "add","path": "/fields/{0}","value": "{1}"';
 
     //current copado__project__c record id
-    public id pId;
+    public Id pId;
 
     //user story object's record types map to match the name from third party platforms
-    static final Map<string,id> recordTypeMap;
+    static final Map<String,id> recordTypeMap;
     static{
         recordTypeMap = new Map<string,id>();
-        for(recordType rt:[select id,name,sobjecttype from recordType where sobjecttype='copado__user_story__c']){
+        for(RecordType rt:[SELECT id,name,sobjecttype FROM RecordType WHERE sobjecttype='copado__user_story__c']){
             recordTypeMap.put(rt.name,rt.id);
         }
     }
 
     //list to return serialized Json values to batch
-    public List<Map<string,string>> userStoryList {get{
+    public List<Map<String,String>> userStoryList {get{
         if(null == userStoryList){
-            userStoryList = new List<Map<string,string>>();
+            userStoryList = new List<Map<String,String>>();
         }
         return userStoryList;
     }set;}
 
     //VSTS work Items id set to use on the second callout
-    public List<string> wIIds {get{
+    public List<List<String>> wIIds {get{
         if(null == wIIds){
-            wIIds = new List<string>();
+            wIIds = new List<List<String>>();
         }
         return wIIds;
     }set;}
 
     //Field mapping values between salesforce and third party platform fields under related project
-    public Map<string,string> fieldMap {get{
+    public Map<String,String> fieldMap {get{
         if(null == fieldMap){
             fieldMap = CopadoCCMutilities.returnFieldMap(pId,' and Exclude_from_tpu__c = false');
         }
@@ -70,9 +76,9 @@ public without sharing class VSTSIntegration implements IIntegration{
     }set;}
 
     //string comma seperated queries to us on sObject record query on updateRecord method
-    public string queryFields {get{
-        if(string.isBlank(queryFields)){
-            queryFields = string.join(new List<string>(fieldMap.keyset()),',');
+    public String queryFields {get{
+        if(String.isBlank(queryFields)){
+            queryFields = String.join(new List<String>(fieldMap.keyset()),',');
         }
         return queryFields;
     }set;}
@@ -80,67 +86,78 @@ public without sharing class VSTSIntegration implements IIntegration{
     //updates single record based on the external id on VSTS
     //this method will be triggered by the SendUpdatedValues2TP process on user story status change.
     //You can clone the proces and change the firing conditions anytime
-    public void updateRecord(copado__user_story__c usItem){
+    public void updateRecord(copado__User_story__c usItem){
         pId = usItem.copado__Project__c;
         projectExtId = usItem.copado__Project__r.Project_External_Id__c;
         workspaceId = usItem.copado__Project__r.Workspace_Id__c;
-        id usId = usItem.id;
-        sObject cUserStory = database.query('select '+queryFields+',enable_logs__c from copado__user_story__c where id=:usId');
-        string finalJson = '[{';
-        for(string s:fieldMap.keyset()){
+        Id usId = usItem.id;
+        Sobject cUserStory = Database.query('select '+queryFields+',enable_logs__c from copado__user_story__c where id=:usId');
+        String finalJson = '[{';
+        for(String s:fieldMap.keyset()){
             if(null != cUserStory.get(s)){
-                finalJson += string.format(JsonTemplate,new List<string>{fieldMap.get(s),string.escapeSingleQuotes(string.valueOf(cUserStory.get(s)))}) + '},{';
+                finalJson += String.format(JsonTemplate,new List<String>{fieldMap.get(s),String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + '},{';
             }
         }
-        system.debug('finalJson==> '+finalJson);
+        System.debug('finalJson==> '+finalJson);
         //callout body to update VSTS record which is created from field mappings under related project and current field values
         finalJson = finalJson.substring(0,finalJson.length()-2) + ']';
         namedCredential = usItem.copado__Project__r.Copado_Integration_Setting__r.Named_Credential__c;
         //callout for field update
-        string responseText = CopadoCCMutilities.MakeCallout(namedCredential,workspacePath2Patch,authApiVersion,(string)cUserStory.get('External_Id__c'),'',new List<string>{contentTypeHeader4Patch,connectionHeader,overridePostMethod},Method.POST,finalJson,cUserStory,null);
+        String responseText = CopadoCCMutilities.MakeCallout(namedCredential,workspacePath2Patch,authApiVersion,(String)cUserStory.get('External_Id__c'),'',new List<String>{contentTypeHeader4Patch,connectionHeader,overridePostMethod},Method.POST,finalJson,cUserStory,null);
         CopadoCCMutilities.createLogRecords();
     }
 
-    public List<Map<string,string>> fetchRecords(copado__Project__c selectedProject){
+    public List<Map<String,String>> fetchRecords(copado__Project__c selectedProject){
         pid = selectedProject.id;
         projectExtId = selectedProject.Project_External_Id__c;
         workspaceId = selectedProject.Workspace_Id__c;
         namedCredential = selectedProject.Copado_Integration_Setting__r.Named_Credential__c;
         //callout to find ids of the WorkItems exist on VSTS
-        string responseText = CopadoCCMutilities.MakeCallout(namedCredential,projectExtId,workspaceId,authQueryPath,authApiVersion,new List<string>{contentTypeHeader},Method.GET,null,null,selectedProject);
+        String responseText = CopadoCCMutilities.MakeCallout(namedCredential,projectExtId,workspaceId,authQueryPath,authApiVersion,new List<String>{contentTypeHeader},Method.GET,null,null,selectedProject);
         JSONParser parser = JSON.createParser(responseText);
         //wrapper class direct parse
         authWrapper authWrapperItem = (authWrapper)parser.readValueAs(authWrapper.class);
+        Integer counter4Ids=0,currentIndex=0;
         for(workItemsWrapper wiw:authWrapperItem.workItems){
-            wIIds.add(string.valueOf(wiw.id));
-        }
-        //callout to have all fields for desired workItems
-        string responseText2 = CopadoCCMutilities.MakeCallout(namedCredential,projectExtId,string.join(wIIds,','),workspacePath,'',new List<string>{contentTypeHeader,connectionHeader},Method.GET,null,null,selectedProject);
-        JSONParser parser2 = JSON.createParser(responseText2);
-        //wrapper class direct parse
-        VSTSIntegration.queryWrapper queryWrapperItem = (VSTSIntegration.queryWrapper)parser2.readValueAs(VSTSIntegration.queryWrapper.class);
-
-        for(valueWrapper vw:queryWrapperItem.value){
-            userStoryList.add(vw.fields);
-            for(string s:vw.fields.keyset()){
-                if(s == 'System.WorkItemType' && recordTypeMap.containsKey(vw.fields.get(s))){
-                    //fills up recordtypeId if the VSTS workItemtype name matches with any of the salesforce's recordtype name's on user story object
-                    vw.fields.put('recordTypeId',recordTypeMap.get(vw.fields.get(s)));
-                }
-                else if(s == 'System.AssignedTo' && vw.fields.get(s).contains('<')){
-                    //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
-                    string cuEmail = vw.fields.get(s).subStringAfter('<').subsTringBefore('>');
-                    if(CopadoCCMutilities.userMap.containsKey(cuEmail)){
-                        vw.fields.put('developer',CopadoCCMutilities.userMap.get(cuEmail));
-                    }
-                }
-                else vw.fields.put(s.toLowerCase(),vw.fields.get(s).toLowerCase());
+            if(counter4Ids == 0){
+                wIIds.add(new List<String>());
             }
-            //below four rows are in use for look up and external id purpose
-            vw.fields.put('id',string.valueOf(vw.id));
-            vw.fields.put('url',string.valueOf(vw.url));
-            vw.fields.put('rev',string.valueOf(vw.rev));
-            vw.fields.put('projectid',pid);
+            wIIds[currentIndex].add(String.valueOf(wiw.id));
+            counter4Ids++;
+            if(counter4Ids == vstsPaginationSize){
+                counter4Ids = 0;
+                currentIndex++;
+            }
+        }
+        for(Integer idCounter=0;idCounter < wIIds.size();idCounter++) {
+            //callout to have all fields for desired workItems
+            String responseText2 = CopadoCCMutilities.MakeCallout(namedCredential, projectExtId, string.join(wIIds[idCounter], ','), workspacePath, '', new List<string>{
+                    contentTypeHeader, connectionHeader
+            }, Method.GET, null, null, selectedProject);
+            JSONParser parser2 = JSON.createParser(responseText2);
+            //wrapper class direct parse
+            VSTSIntegration.queryWrapper queryWrapperItem = (VSTSIntegration.queryWrapper) parser2.readValueAs(VSTSIntegration.queryWrapper.class);
+
+            for (valueWrapper vw : queryWrapperItem.value) {
+                userStoryList.add(vw.fields);
+                for (String s : vw.fields.keyset()) {
+                    if (s == 'System.WorkItemType' && recordTypeMap.containsKey(vw.fields.get(s))) {
+                        //fills up recordtypeId if the VSTS workItemtype name matches with any of the salesforce's recordtype name's on user story object
+                        vw.fields.put('recordTypeId', recordTypeMap.get(vw.fields.get(s)));
+                    } else if (s == 'System.AssignedTo' && vw.fields.get(s).contains('<')) {
+                        //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
+                        String cuEmail = vw.fields.get(s).subStringAfter('<').subsTringBefore('>');
+                        if (CopadoCCMutilities.userMap.containsKey(cuEmail)) {
+                            vw.fields.put('developer', CopadoCCMutilities.userMap.get(cuEmail));
+                        }
+                    } else vw.fields.put(s.toLowerCase(), vw.fields.get(s).toLowerCase());
+                }
+                //below four rows are in use for look up and external id purpose
+                vw.fields.put('id', String.valueOf(vw.id));
+                vw.fields.put('url', String.valueOf(vw.url));
+                vw.fields.put('rev', String.valueOf(vw.rev));
+                vw.fields.put('projectid', pid);
+            }
         }
         CopadoCCMutilities.createLogRecords();
         //returns list to executeUserStoryUpsert batch class
@@ -149,40 +166,40 @@ public without sharing class VSTSIntegration implements IIntegration{
 
     //nested wrapper classes to use on direct Json casting on authentication callout step
     public class authWrapper{
-        public string queryType;
-        public string queryResultType;
-        public string asOf;
+        public String queryType;
+        public String queryResultType;
+        public String asOf;
         public List<columnsWrapper> columns;
         public List<sortColumnsWrapper> sortColumns;
         public List<workItemsWrapper> workItems;
     }
     public class columnsWrapper{
-        public string referenceName;
-        public string name;
-        public string url;
+        public String referenceName;
+        public String name;
+        public String url;
     }
     public class sortColumnsWrapper{
         public sortColumnsfieldWrapper field;
-        public boolean descending;
+        public Boolean descending;
     }
     public class workItemsWrapper{
-        public integer id;
-        public string url;
+        public Integer id;
+        public String url;
     }
     public class sortColumnsfieldWrapper{
-        public string referenceName;
-        public string name;
-        public string url;
+        public String referenceName;
+        public String name;
+        public String url;
     }
 
     public class queryWrapper{
-        public integer count;
+        public Integer count;
         public List<valueWrapper> value;
     }
     public class valueWrapper{
-        public integer id;
-        public integer rev;
-        public Map<string,string> fields;
-        public string url;
+        public Integer id;
+        public Integer rev;
+        public Map<String,String> fields;
+        public String url;
     }
 }

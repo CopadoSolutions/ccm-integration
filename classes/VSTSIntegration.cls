@@ -143,14 +143,14 @@ public without sharing class VSTSIntegration implements IIntegration{
                 for (String s : vw.fields.keyset()) {
                     if (s == 'System.WorkItemType' && recordTypeMap.containsKey(vw.fields.get(s))) {
                         //fills up recordtypeId if the VSTS workItemtype name matches with any of the salesforce's recordtype name's on user story object
-                        vw.fields.put('recordTypeId', recordTypeMap.get(vw.fields.get(s)));
+                        vw.fields.put('recordtypeid', recordTypeMap.get(vw.fields.get(s)));
                     } else if (s == 'System.AssignedTo' && vw.fields.get(s).contains('<')) {
                         //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
                         String cuEmail = vw.fields.get(s).subStringAfter('<').subsTringBefore('>');
                         if (CopadoCCMutilities.userMap.containsKey(cuEmail)) {
                             vw.fields.put('developer', CopadoCCMutilities.userMap.get(cuEmail));
                         }
-                    } else vw.fields.put(s.toLowerCase(), vw.fields.get(s).toLowerCase());
+                    } else vw.fields.put(s.toLowerCase(), vw.fields.get(s));
                 }
                 //below four rows are in use for look up and external id purpose
                 vw.fields.put('id', String.valueOf(vw.id));

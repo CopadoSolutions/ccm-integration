@@ -81,6 +81,9 @@ These files are:
 JIRA_Default_Field_Mappings.csv
 VSTS_Default_Field_Mappings.csv
 
+## Important Note related to Field Mappings
+To be able to Map some values between the Third Party Platform and Salesforce, you need to modify one of the related classes (JIRAIntegration, VSTSIntegration) on Salesforce side. For instance, we use assignee field's email on JIRA to match user email on Salesforce and fill developer look-up on User Story object. On the Field Mappings record, we use developer keyword for Third Party Field Name -which does not exist on JIRA- and check Exclude from Third Party update for that reason. You can see code examples on those classes related to this implementation and add your own code to match additional fields which requires custom development.
+
 ## New Apex Class - ScheduleUserStoryFetch 
 The new class ScheduleUserStoryFetch has been created to perform a bulk from the external provider to Salesforce. Depending on the configuration of its cron expression, it will carry out the bulk operation periodically. It will retrieve all the mapped fields and will update the Salesforce fields with the external data.
 

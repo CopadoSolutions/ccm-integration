@@ -6,14 +6,14 @@
  * @since CCM Integrations 1.0
  */
 @isTest
-public class MockHttpResponseGenerator implements HttpCalloutMock {
+public class CopadoMockHttpResponseGenerator implements HttpCalloutMock {
     protected Integer code;
     protected String status;
     protected String bodyAsString;
     protected Blob bodyAsBlob;
     protected Map<String, String> responseHeaders;
 
-    public MockHttpResponseGenerator(Integer code, String status, String body, Map<String, String> responseHeaders) {
+    public CopadoMockHttpResponseGenerator(Integer code, String status, String body, Map<String, String> responseHeaders) {
         this.code = code;
         this.status = status;
         this.bodyAsString = body;
@@ -21,7 +21,7 @@ public class MockHttpResponseGenerator implements HttpCalloutMock {
         this.responseHeaders = responseHeaders;
     }
 
-    public MockHttpResponseGenerator(Integer code, String status, Blob body, Map<String, String> responseHeaders) {
+    public CopadoMockHttpResponseGenerator(Integer code, String status, Blob body, Map<String, String> responseHeaders) {
         this.code = code;
         this.status = status;
         this.bodyAsBlob = body;

@@ -92,9 +92,14 @@ The new class ScheduleUserStoryFetch has been created to perform a bulk from the
 
 Sample on how to schedule the fetch process:
 ```
- ScheduleUserStoryFetch Susf = new ScheduleUserStoryFetch (prpjectRecordId);
- String str = Datetime.now().addSeconds(5).format('s m H d M ? yyyy');
- String jobID = system.schedule('ScheduleUserStoryFetch - ' + DateTime.Now() + '.' + math.mod(DateTime.now().getTime(), 1000), str, Susf);
+//Parameters to be changed
+Integer timeIntervalInSeconds = 600;  //e.g. 600 seconds = 10 minutes
+String myProjectRecordId = 'project_id_must_be_here';
+
+//Now let's schedule the project sync
+ScheduleUserStoryFetch scheduledClass = new ScheduleUserStoryFetch (myProjectRecordId);
+String cronExpression = Datetime.now().addSeconds(timeIntervalInSeconds).format('s m H d M ? yyyy');
+String jobID = system.schedule('Scheduled User Story Sync for '+ myProjectRecordId, cronExpression, scheduledClass);
 ```
 
 ## New Process Builder Flow - SendUpdatedValues2TP

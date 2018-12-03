@@ -25,6 +25,14 @@ ScheduleUserStoryFetch class
 VSTSIntegration class
 ```
 
+# Copado Change Management Integrations v1.9 update (12-03-2018)
+- Added object type response handling functionality for VSTS side for JSON response on "fields" level to fix "Illegal value for primitive" issue. 
+
+**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
+```
+VSTSIntegration class
+```
+
 # How does it work?
 Copado Solutions has built the authentication module as well as the framework for retrieving user stories and inserting these into the Copado sObject called, "User Story" and synchronizing them with the external provider when changes are detected.  The field mapping is also handled by the integration process. Both, the data being queried from the data source as well as the mapping, can be modified by users depending on their needs.  
 

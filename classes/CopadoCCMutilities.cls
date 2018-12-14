@@ -111,6 +111,24 @@ public with sharing class CopadoCCMutilities {
         }
         return fieldMap;
     }
+    //Escapes undesired characters in the returned JSON
+    public static String escapeInvalidChars(String responseText){
+        responseText = String.escapeSingleQuotes(responseText);
+        responseText = responseText.escapeHTML4();
+        responseText = responseText.replace('{&quot;','{"');
+        responseText = responseText.replace('&quot;:&quot;','":"');
+        responseText = responseText.replace('&quot;,&quot;','","');
+        responseText = responseText.replace('&quot;:','":');
+        responseText = responseText.replace(',&quot;',',"');
+        responseText = responseText.replace('&quot;}','"}');
+        responseText = responseText.replace('&amp;','&');
+        responseText = responseText.replace('\b','\\b');
+        responseText = responseText.replace('\n','\\n');
+        responseText = responseText.replace('\t','\\t');
+        responseText = responseText.replace('\r','\\r');
+        responseText = responseText.replace('\\','\\\\');
+        return responseText;
+    }
     public static String replaceFromCurly(String strwcurly){
         return strwcurly.replace('lcurly','{').replace('rcurly','}');
     }

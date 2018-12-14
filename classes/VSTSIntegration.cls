@@ -134,10 +134,8 @@ public without sharing class VSTSIntegration implements IIntegration{
             String responseText2 = CopadoCCMutilities.MakeCallout(namedCredential, projectExtId, string.join(wIIds[idCounter], ','), workspacePath, '', new List<string>{
                     contentTypeHeader, connectionHeader
             }, Method.GET, null, null, selectedProject);
-            responseText2 = responseText2.replace('\\','');
-            responseText2 = responseText2.replace('="','=\\"');
-            responseText2 = responseText2.replace('">','\\">');
-            Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(responseText2);
+            
+            Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(CopadoCCMUtilities.escapeInvalidChars(responseText2));
             List<Object> values = (List<Object>) results.get('value');
             Map<String, String> keyValuepairTempMap;
 

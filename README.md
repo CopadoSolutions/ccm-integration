@@ -38,7 +38,7 @@ VSTSIntegration class
 
 **Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
 ```
-CopadoCCMutilities
+CopadoCCMutilities class
 VSTSIntegration class
 ```
 

@@ -2,6 +2,8 @@
 
 Copado Solutions can integrate your external project management systems with Copado maintaining a bi-directional synchronization of your items between Copado Change Management and your external provider, such as Jira or Microsoft VSTS. This repository will hold the base layer of the integration code that may be extended by the community.
 
+You can see the related documentation: https://docs.copa.do/additional-articles/copado-change-management-integrations
+
 The latest version supports JIRA and Microsoft VSTS.
 If your provider is not one of these, check out this other repository: https://github.com/CopadoSolutions/CopadoIntegrations
 

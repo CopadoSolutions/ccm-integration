@@ -149,4 +149,5 @@ This resource will help avoiding sync conflicts while keeping the technical solu
 - To be able to update JIRA fields from Salesforce, fields you want to update must be on the layout screens.
 - Go to https://<your url>/plugins/servlet/project-config/<projectKey>/screens, click to screen that you want to edit and add your fields to create, edit, view screens.
 
-
+- If you have Jira On-Premises behind a Firewall, make sure you white list Salesforce's IP ranges since communication is done from Salesforce Organization to Jira, for more info: 
+https://help.salesforce.com/articleView?id=000003652&type=1

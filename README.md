@@ -66,7 +66,9 @@ Here, you will personalize your credentials with the authorization to the extern
 
 - A Jira endpoint might look as follows: https://COMPANY_DOMAIN_NAME.atlassian.net/rest/api/2/
 
-- A Azure DevOps endpoint might look as follows: https://COMPANY_DOMAIN_NAME.visualstudio.com/
+- The Azure DevOps URL will be as follows https://dev.azure.com/COMPANY_DOMAIN_NAME/
+
+Note: If your company have setup the integration before VSTS was rebranded to Azure, the old URL endpoint https://COMPANY_DOMAIN_NAME.visualstudio.com/ is still usable.
 
 Note: For Azure DevOps, it is required to provide your personal access token instead of the password. Otherwise, it will not return the content from the external provider. To generate your access token go to: User > Security > Access Token.
 

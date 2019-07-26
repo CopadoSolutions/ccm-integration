@@ -133,10 +133,15 @@ On the User Story and the Project, there is a checkbox labelled as “Enable Log
 Jira sends 204 code when Salesforce sends a record and the operation was successful (instead of the usual 200 code). 
 
 Some considerations when reading the logs:
-- For each operation, Jira sends 3 callouts.
-- For each operation, Azure DevOps sends 1 call out.
+- For each operation (Salesforce update to Jira), Jira sends 3 callouts. 
+- For each operation (Salesforce update to Azure DevOps), Azure DevOps sends 1 call out.
+
+The callout log records generated from Salesforce updates are tracked when flagging the Enable Logs checkbox in user story record and are stored Callout Logs user story related list.
+
 - At fetch level, Jira performs 1 callouts.
 - At fetch level, Azure DevOps performs 2 callouts.
+
+The callout log records generated from fetching are tracked when flagging the Enable Logs checkbox in project record and are stored in the Callout Logs project related list.
 
 This logging system was implemented to handle the characteristics of this integration (future callouts) for a better error handling.
 

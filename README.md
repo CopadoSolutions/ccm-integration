@@ -1,10 +1,10 @@
 # Copado Change Management Integrations
 
-Copado Solutions can integrate your external project management systems with Copado maintaining a bi-directional synchronization of your items between Copado Change Management and your external provider, such as Jira or Microsoft VSTS. This repository will hold the base layer of the integration code that may be extended by the community.
+Copado Solutions can integrate your external project management systems with Copado maintaining a bi-directional synchronization of your items between Copado Change Management and your external provider, such as Jira or Azure DevOps (formerly known as VSTS). This repository will hold the base layer of the integration code that may be extended by the community.
 
-You can see the related documentation: https://docs.copa.do/additional-articles/copado-change-management-integrations
+You can see the related documentation: https://docs.copa.do/article/rmpc3lyhfd-copado-change-management-integrations
 
-The latest version supports JIRA and Microsoft VSTS.
+The latest version supports JIRA and Azure DevOps (formerly known as VSTS).
 If your provider is not one of these, check out this other repository: https://github.com/CopadoSolutions/CopadoIntegrations
 
 # Copado Change Management Integrations v1.3 update (07-02-2018)
@@ -20,7 +20,7 @@ ScheduleUserStoryFetch class
 ```
 
 # Copado Change Management Integrations v1.6 update (07-31-2018)
-- Added VSTS callout pagination functionality for too many records.
+- Added Azure DevOps callout pagination functionality for too many records.
 
 **Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
 ```
@@ -28,7 +28,7 @@ VSTSIntegration class
 ```
 
 # Copado Change Management Integrations v1.9 update (12-03-2018)
-- Added object type response handling functionality for VSTS side for JSON response on "fields" level to fix "Illegal value for primitive" issue. 
+- Added object type response handling functionality for Azure DevOps side for JSON response on "fields" level to fix "Illegal value for primitive" issue. 
 
 **Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
 ```
@@ -66,15 +66,17 @@ Here, you will personalize your credentials with the authorization to the extern
 
 - A Jira endpoint might look as follows: https://COMPANY_DOMAIN_NAME.atlassian.net/rest/api/2/
 
-- A Microsoft VSTS endpoint might look as follows: https://COMPANY_DOMAIN_NAME.visualstudio.com/
+- The Azure DevOps URL will be as follows https://dev.azure.com/COMPANY_DOMAIN_NAME/
 
-Note: For Microsoft VSTS, it is required to provide your personal access token instead of the password. Otherwise, it will not return the content from the external provider. To generate your access token go to: User > Security > Access Token.
+Note: If your company have setup the integration before VSTS was rebranded to Azure, the old URL endpoint https://COMPANY_DOMAIN_NAME.visualstudio.com/ is still usable.
+
+Note: For Azure DevOps, it is required to provide your personal access token instead of the password. Otherwise, it will not return the content from the external provider. To generate your access token go to: User > Security > Access Token.
 
 
 2) In Copado Integration Settings tab, create a new record with your external provider. During the record creation, provide a name (Copado Integration Setting Name field), select a provider from the picklist (External System field) and type the Named Credential you have just created (Named Credential field). It is very important to type the Named Credentials correctly since Named Credentials cannot be located through a lookup field.
 
 3) Create a new Project to include all the User Stories that will be synchronized.
-Go to Projects tab in Copado Change Management application and create a Project for your User Stories. Provide a Name for it, your external provider’s Project Id (Project External Id field), provide also Workspace Id for Microsoft VSTS using the Query Id (found in the address bar as a parameter - a VSTS Query Id might look as follows: bd7cae54-f1d1-4687-b313-0c64ecdfe731)  and select the Copado Integration Setting you have just created for your external provider.
+Go to Projects tab in Copado Change Management application and create a Project for your User Stories. Provide a Name for it, your external provider’s Project Id (Project External Id field), provide also Workspace Id for Azure DevOps using the Query Id (found in the address bar as a parameter - a VSTS Query Id might look as follows: bd7cae54-f1d1-4687-b313-0c64ecdfe731)  and select the Copado Integration Setting you have just created for your external provider.
 
 4) Set the fields mappings for the integration.
 Within the Field Mapping related list of your integration project, you can add as many field mappings as you wish. 
@@ -89,10 +91,10 @@ Optional fields:
 - Exclude From Salesforce Update: Salesforce fields you do not want to be updated with the external fields values.
 - Target Field Type. String or object types. This type is used for the JSON file creation.
 
-### Mandatory Field Mapping records for both JIRA and VSTS:
+### Mandatory Field Mapping records for both JIRA and Azure DevOps:
       Salesforce_Field_Name__c | Third_Party_Field_Name__c | Exclude_from_tpu__c
 -       copado__Project__c 		         projectId 		                true
--       External_Id__c        	  	      id                 true(false for VSTS)
+-       External_Id__c        	  	      id                 true(false for Azure DevOps)
 
 ## Fields mapping by default
 In this repository you will find two files to be uploaded to your Salesforce Org. They contain a set of fields by default for both providers for an easy and quick setup. 
@@ -133,10 +135,15 @@ On the User Story and the Project, there is a checkbox labelled as “Enable Log
 Jira sends 204 code when Salesforce sends a record and the operation was successful (instead of the usual 200 code). 
 
 Some considerations when reading the logs:
-- For each operation, Jira sends 3 callouts.
-- For each operation, VSTS sends 1 call out.
+- For each operation (Salesforce update to Jira), Jira sends 3 callouts. 
+- For each operation (Salesforce update to Azure DevOps), Azure DevOps sends 1 call out.
+
+The callout log records generated from Salesforce updates are tracked when flagging the Enable Logs checkbox in user story record and are stored Callout Logs user story related list.
+
 - At fetch level, Jira performs 1 callouts.
-- At fetch level, VSTS performs 2 callouts.
+- At fetch level, Azure DevOps performs 2 callouts.
+
+The callout log records generated from fetching are tracked when flagging the Enable Logs checkbox in project record and are stored in the Callout Logs project related list.
 
 This logging system was implemented to handle the characteristics of this integration (future callouts) for a better error handling.
 

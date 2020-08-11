@@ -105,6 +105,16 @@ public with sharing class JiraIntegration implements IIntegration {
         }
         set;
     }
+    
+    public String fieldsToFetch {
+        get {
+            if(String.isBlank(fieldsToFetch)){
+                fieldsToFetch = String.join( fieldMap.values(),  COMMA) + COMMA + ASSIGNEE + COMMA + ID_STRING + COMMA + KEY_STRING + COMMA + PROJECTID;
+            }
+            return fieldsToFetch;
+        }
+        set;
+    }
 
     //salesforce field api to third party field type Mapping to use on third party record update operation
     //exps: copado__status__c => Object
@@ -206,6 +216,7 @@ public with sharing class JiraIntegration implements IIntegration {
         Integer startIndex = 0;
         Boolean shouldContinue = true;
         Integer total;
+        
         //Gets issues via JQR
         while(shouldContinue) {
             String responseText = CopadoCCMutilities.MakeCallout(
@@ -213,7 +224,7 @@ public with sharing class JiraIntegration implements IIntegration {
                 EMPTY_CHAR, 
                 projectExtId+jqlExtFilter, 
                 AUTH_QUERY_PATH, 
-                START_AT_URI + startIndex, 
+                START_AT_URI + startIndex + '&fields='+fieldsToFetch, 
                 new List<String>{
                     CONTENT_TYPE_HEADER
                 }, 
@@ -335,7 +346,7 @@ public with sharing class JiraIntegration implements IIntegration {
             }
         }
     }
-    
+
     /**
      * Wrapper classes for direct casting of Transition Callout response
      */

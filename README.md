@@ -44,7 +44,7 @@ CopadoCCMutilities class
 VSTSIntegration class
 ```
 
-# Copado Change Management Integrations v1.11 update (08-11-2018)
+# Copado Change Management Integrations v1.11 update (08-11-2020)
 - KI-00251 fix on JIRA side : When syncing user stories from Jira, if the callout logs generated are too big and they exceed the max number of characters in the Response Body field, the Callout Log record is not created in the project.
 
 **Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.

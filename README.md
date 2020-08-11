@@ -79,6 +79,7 @@ Here, you will personalize your credentials with the authorization to the extern
 Note: If your company have setup the integration before VSTS was rebranded to Azure, the old URL endpoint https://COMPANY_DOMAIN_NAME.visualstudio.com/ is still usable.
 
 Note: For Azure DevOps, it is required to provide your personal access token instead of the password. Otherwise, it will not return the content from the external provider. To generate your access token go to: User > Security > Access Token.
+For JIRA, it is required to provide your api token instead of the password,Otherwise, it will not return the content from the external provider. To generate your access token go to: https://id.atlassian.com/manage-profile/security/api-tokens.
 
 
 2) In Copado Integration Settings tab, create a new record with your external provider. During the record creation, provide a name (Copado Integration Setting Name field), select a provider from the picklist (External System field) and type the Named Credential you have just created (Named Credential field). It is very important to type the Named Credentials correctly since Named Credentials cannot be located through a lookup field.

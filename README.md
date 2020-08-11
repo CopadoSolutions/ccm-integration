@@ -44,6 +44,14 @@ CopadoCCMutilities class
 VSTSIntegration class
 ```
 
+# Copado Change Management Integrations v1.11 update (08-11-2018)
+- KI-00251 fix on JIRA side : When syncing user stories from Jira, if the callout logs generated are too big and they exceed the max number of characters in the Response Body field, the Callout Log record is not created in the project.
+
+**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
+```
+JIRAIntegration class
+```
+
 # How does it work?
 Copado Solutions has built the authentication module as well as the framework for retrieving user stories and inserting these into the Copado sObject called, "User Story" and synchronizing them with the external provider when changes are detected.  The field mapping is also handled by the integration process. Both, the data being queried from the data source as well as the mapping, can be modified by users depending on their needs.  
 
@@ -55,8 +63,8 @@ Installation instructions can be found below.
 
 # Installation instructions
 To install the application, use one of the below URLs:
-- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000000b6f5
-- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000000b6f5
+- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000000b6k0
+- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000000b6k0
 
 # Getting started with Copado Change Management Integrations
 In order to customize your integration, follow these steps:

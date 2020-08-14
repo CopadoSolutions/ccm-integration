@@ -72,14 +72,20 @@ public with sharing class CopadoCCMutilities {
         if(FldType == 'boolean')            return Boolean.valueOf(param);
         if(FldType == 'string')             return String.valueOf(param);
         if(FldType == 'blob')               return (Blob)param;
-        if(FldType == 'date')               return Date.valueOf(param);
-        if(FldType == 'datetime')           return Datetime.valueOf(param);
+        if(FldType == 'date')               return Date.valueOf(applySalesforceDateFormatString(param));
+        if(FldType == 'datetime')           return Datetime.valueOf(applySalesforceDateTimeFormatString(param));
         if(FldType == 'time')               return (Time)param;
         if(FldType == 'integer')            return Integer.valueOf(param);
         if(FldType == 'long')               return (Long)param;
         if(FldType == 'decimal')            return (Decimal)param;
         if(FldType == 'double')             return Double.valueOf(param);
         return null;
+    }
+    private static String applySalesforceDateFormatString(Object param) {
+        return String.valueOf(param).replace('Z','+0000');
+    }
+    private static String applySalesforceDateTimeFormatString(Object param) {
+        return String.valueOf(param).replace('T',' ');
     }
     //usermap to match lookup values via third party users' mail addresses
     public static final Map<String,Id> userMap;

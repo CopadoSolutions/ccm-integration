@@ -7,6 +7,39 @@ You can see the related documentation: https://docs.copa.do/article/rmpc3lyhfd-c
 The latest version supports JIRA and Azure DevOps (formerly known as VSTS).
 If your provider is not one of these, check out this other repository: https://github.com/CopadoSolutions/CopadoIntegrations
 
+
+# Copado Change Management Integrations v1.11 update (08-11-2020)
+- KI-00251 fix on JIRA side : When syncing user stories from Jira, if the callout logs generated are too big and they exceed the max number of characters in the Response Body field, the Callout Log record is not created in the project.
+
+**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
+```
+JIRAIntegration class
+```
+# Copado Change Management Integrations v1.10 update (12-14-2018)
+- Added escapeInvalidChars method in CopadoCCMutilities class for unexpected, unescaped characters and applied on VSTSIntegration class 
+
+**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
+```
+CopadoCCMutilities class
+VSTSIntegration class
+```
+
+# Copado Change Management Integrations v1.9 update (12-03-2018)
+- Added object type response handling functionality for Azure DevOps side for JSON response on "fields" level to fix "Illegal value for primitive" issue. 
+
+**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
+```
+VSTSIntegration class
+```
+
+# Copado Change Management Integrations v1.6 update (07-31-2018)
+- Added Azure DevOps callout pagination functionality for too many records.
+
+**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
+```
+VSTSIntegration class
+```
+
 # Copado Change Management Integrations v1.3 update (07-02-2018)
 - Added support for external Integers migration.
 - Added support for JQL extended queries in Jira.
@@ -19,38 +52,6 @@ Utilities class
 ScheduleUserStoryFetch class
 ```
 
-# Copado Change Management Integrations v1.6 update (07-31-2018)
-- Added Azure DevOps callout pagination functionality for too many records.
-
-**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
-```
-VSTSIntegration class
-```
-
-# Copado Change Management Integrations v1.9 update (12-03-2018)
-- Added object type response handling functionality for Azure DevOps side for JSON response on "fields" level to fix "Illegal value for primitive" issue. 
-
-**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
-```
-VSTSIntegration class
-```
-
-# Copado Change Management Integrations v1.10 update (12-14-2018)
-- Added escapeInvalidChars method in CopadoCCMutilities class for unexpected, unescaped characters and applied on VSTSIntegration class 
-
-**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
-```
-CopadoCCMutilities class
-VSTSIntegration class
-```
-
-# Copado Change Management Integrations v1.11 update (08-11-2020)
-- KI-00251 fix on JIRA side : When syncing user stories from Jira, if the callout logs generated are too big and they exceed the max number of characters in the Response Body field, the Callout Log record is not created in the project.
-
-**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
-```
-JIRAIntegration class
-```
 
 # How does it work?
 Copado Solutions has built the authentication module as well as the framework for retrieving user stories and inserting these into the Copado sObject called, "User Story" and synchronizing them with the external provider when changes are detected.  The field mapping is also handled by the integration process. Both, the data being queried from the data source as well as the mapping, can be modified by users depending on their needs.  

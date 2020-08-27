@@ -20,7 +20,15 @@ public without sharing class VSTSIntegration implements IIntegration{
         }
         return vstsPaginationSize;
     }set;}
-
+    
+    private final String COMMA = ',';
+    private final String ASSIGNED_TO = 'System.AssignedTo';
+    private final String PROJECT = 'System.TeamProject';
+    private final String WORK_ITEM_TYPE = 'System.WorkItemType';
+    private final String EXTERNAL_ID = 'External_Id__c';
+    private final String FIELDS = 'fields';
+    private final String UNIQUE_NAME = 'uniqueName';
+    private final String DISPLAY_NAME = 'displayName';
     //endpoint path to reach work items ids
     public final String authQueryPath = '/_apis/wit/wiql/';
     //endpoint api version
@@ -66,6 +74,16 @@ public without sharing class VSTSIntegration implements IIntegration{
         }
         return wIIds;
     }set;}
+    
+    public String fieldsToFetch {
+        get {
+            if(String.isBlank(fieldsToFetch)){
+                fieldsToFetch = String.join( fieldMap.values(),  COMMA) + COMMA + ASSIGNED_TO + COMMA + PROJECT + COMMA + WORK_ITEM_TYPE;
+            }
+            return fieldsToFetch;
+        }
+        set;
+    }
 
     //Field mapping values between salesforce and third party platform fields under related project
     public Map<String,String> fieldMap {get{
@@ -78,7 +96,7 @@ public without sharing class VSTSIntegration implements IIntegration{
     //string comma seperated queries to us on sObject record query on updateRecord method
     public String queryFields {get{
         if(String.isBlank(queryFields)){
-            queryFields = String.join(new List<String>(fieldMap.keyset()),',');
+            queryFields = String.join(new List<String>(fieldMap.keyset()),COMMA);
         }
         return queryFields;
     }set;}
@@ -98,12 +116,27 @@ public without sharing class VSTSIntegration implements IIntegration{
                 finalJson += String.format(JsonTemplate,new List<String>{fieldMap.get(s),String.escapeSingleQuotes(String.valueOf(cUserStory.get(s)))}) + '},{';
             }
         }
-        System.debug('finalJson==> '+finalJson);
+        
         //callout body to update VSTS record which is created from field mappings under related project and current field values
         finalJson = finalJson.substring(0,finalJson.length()-2) + ']';
         namedCredential = usItem.copado__Project__r.Copado_Integration_Setting__r.Named_Credential__c;
         //callout for field update
-        String responseText = CopadoCCMutilities.MakeCallout(namedCredential,workspacePath2Patch,authApiVersion,(String)cUserStory.get('External_Id__c'),'',new List<String>{contentTypeHeader4Patch,connectionHeader,overridePostMethod},Method.POST,finalJson,cUserStory,null);
+        String responseText = CopadoCCMutilities.MakeCallout(
+            namedCredential,
+            workspacePath2Patch,
+            authApiVersion,
+            (String)cUserStory.get(EXTERNAL_ID),
+            '',
+            new List<String>{
+                contentTypeHeader4Patch,
+                connectionHeader,
+                overridePostMethod
+            },
+            Method.POST,
+            finalJson,
+            cUserStory,
+            null
+        );
         CopadoCCMutilities.createLogRecords();
     }
 
@@ -113,7 +146,20 @@ public without sharing class VSTSIntegration implements IIntegration{
         workspaceId = selectedProject.Workspace_Id__c;
         namedCredential = selectedProject.Copado_Integration_Setting__r.Named_Credential__c;
         //callout to find ids of the WorkItems exist on VSTS
-        String responseText = CopadoCCMutilities.MakeCallout(namedCredential,projectExtId,workspaceId,authQueryPath,authApiVersion,new List<String>{contentTypeHeader},Method.GET,null,null,selectedProject);
+        String responseText = CopadoCCMutilities.MakeCallout(
+            namedCredential,
+            projectExtId,
+            workspaceId,
+            authQueryPath,
+            authApiVersion,
+            new List<String>{
+                contentTypeHeader
+            },
+            Method.GET,
+            null,
+            null,
+            selectedProject
+        );
         JSONParser parser = JSON.createParser(responseText);
         //wrapper class direct parse
         authWrapper authWrapperItem = (authWrapper)parser.readValueAs(authWrapper.class);
@@ -131,59 +177,75 @@ public without sharing class VSTSIntegration implements IIntegration{
         }
         for(Integer idCounter=0;idCounter < wIIds.size();idCounter++) {
             //callout to have all fields for desired workItems
-            String responseText2 = CopadoCCMutilities.MakeCallout(namedCredential, projectExtId, string.join(wIIds[idCounter], ','), workspacePath, '', new List<string>{
-                    contentTypeHeader, connectionHeader
-            }, Method.GET, null, null, selectedProject);
+            String responseText2 = CopadoCCMutilities.MakeCallout(
+                namedCredential,
+                projectExtId, 
+                String.join(wIIds[idCounter], ','), 
+                workspacePath, 
+                '&fields='+fieldsToFetch, 
+                new List<string>{
+                        contentTypeHeader, connectionHeader
+                }, 
+                Method.GET, 
+                null, 
+                null, 
+                selectedProject
+            );
             
             Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(CopadoCCMUtilities.escapeInvalidChars(responseText2));
             List<Object> values = (List<Object>) results.get('value');
-            Map<String, String> keyValuepairTempMap;
-
-            for (Object value : values) {
-                Map<String, Object> currentValue = (Map<String, Object>) value;
-                keyValuepairTempMap = new Map<String, String>();
-                if (null != currentValue.get('fields')) {
-                    Map<String, Object> fields = (Map<String, Object>) currentValue.get('fields');
-                    for (String sItem : fields.keyset()) {
-                        if (sItem == 'System.WorkItemType' && recordTypeMap.containsKey((String)fields.get(sItem))) {
-                            //fills up recordtypeId if the VSTS workItemtype name matches with any of the salesforce's recordtype name's on user story object
-                            keyValuepairTempMap.put('recordtypeid', recordTypeMap.get((String)fields.get(sItem)));
-                        } else if (sItem == 'System.AssignedTo' && String.valueOf(fields.get(sItem)).contains('<')) {
-                            //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
-                            String cuEmail = String.valueOf(fields.get(sItem)).subStringAfter('<').subsTringBefore('>');
-                            if (CopadoCCMutilities.userMap.containsKey(cuEmail)) {
-                                keyValuepairTempMap.put('developer', CopadoCCMutilities.userMap.get(cuEmail));
-                            }
-                        }else if (fields.get(sItem) instanceof String || fields.get(sItem) instanceof Integer || fields.get(sItem) instanceof Decimal || fields.get(sItem) instanceof Double || fields.get(sItem) == null) {
-                            //Prepares values from String
-                            keyValuepairTempMap.put(sItem.toLowerCase(), String.valueOf(fields.get(sItem)));
-                        }else if (fields.get(sItem) instanceof Map<String, Object>) {
-                            //Prepares values from Json Object
-                            Map<String, Object> tempObject = (Map<String, Object>) fields.get(sItem);
-                            if (null != tempObject.get('uniqueName')) {
-                                String cuEmail = String.valueOf(tempObject.get('uniqueName')).toLowerCase();
-                                if (CopadoCCMutilities.userMap.containsKey(cuEmail)) {
-                                    keyValuepairTempMap.put(sItem.toLowerCase(), CopadoCCMutilities.userMap.get(cuEmail));
-                                }
-                            }else if (null != tempObject.get('displayName')) {
-                                keyValuepairTempMap.put(sItem.toLowerCase(), (String) tempObject.get('displayName'));
-                            }
-                        }else keyValuepairTempMap.put(sItem.toLowerCase(), String.valueOf(fields.get(sItem)));
-                    }
-                    //below four rows are in use for look up and external id purpose
-                    keyValuepairTempMap.put('id', String.valueOf(currentValue.get('id')));
-                    keyValuepairTempMap.put('url', String.valueOf(currentValue.get('url')));
-                    keyValuepairTempMap.put('rev', String.valueOf(currentValue.get('rev')));
-                    keyValuepairTempMap.put('projectid', pid);
-                    userStoryList.add(keyValuepairTempMap);
-                }
-            }
+            
+            iterateThroughIssues(values);
         }
+            
         CopadoCCMutilities.createLogRecords();
         //returns list to executeUserStoryUpsert batch class
         return this.userStoryList;
     }
-
+    
+    private void iterateThroughIssues(List<Object> values) {
+        Map<String, String> keyValuepairTempMap;
+        for (Object value : values) {
+            Map<String, Object> currentValue = (Map<String, Object>) value;
+            keyValuepairTempMap = new Map<String, String>();
+            if (null != currentValue.get(FIELDS)) {
+                Map<String, Object> fields = (Map<String, Object>) currentValue.get(FIELDS);
+                for (String sItem : fields.keyset()) {
+                    if (sItem == 'System.WorkItemType' && recordTypeMap.containsKey((String)fields.get(sItem))) {
+                        //fills up recordtypeId if the VSTS workItemtype name matches with any of the salesforce's recordtype name's on user story object
+                        keyValuepairTempMap.put('recordtypeid', recordTypeMap.get((String)fields.get(sItem)));
+                    } else if (sItem == 'System.AssignedTo' && String.valueOf(fields.get(sItem)).contains('<')) {
+                        //fills up user look up fields, if email address in use on Third Party Platform matches any of the email addresses on current salesforce org.
+                        String cuEmail = String.valueOf(fields.get(sItem)).subStringAfter('<').subsTringBefore('>');
+                        if (CopadoCCMutilities.userMap.containsKey(cuEmail)) {
+                            keyValuepairTempMap.put('developer', CopadoCCMutilities.userMap.get(cuEmail));
+                        }
+                    } else if (fields.get(sItem) instanceof String || fields.get(sItem) instanceof Integer || fields.get(sItem) instanceof Decimal || fields.get(sItem) instanceof Double || fields.get(sItem) == null) {
+                        //Prepares values from String
+                        keyValuepairTempMap.put(sItem.toLowerCase(), String.valueOf(fields.get(sItem)));
+                    } else if (fields.get(sItem) instanceof Map<String, Object>) {
+                        //Prepares values from Json Object
+                        Map<String, Object> tempObject = (Map<String, Object>) fields.get(sItem);
+                        if (null != tempObject.get(UNIQUE_NAME)) {
+                            String cuEmail = String.valueOf(tempObject.get(UNIQUE_NAME)).toLowerCase();
+                            if (CopadoCCMutilities.userMap.containsKey(cuEmail)) {
+                                keyValuepairTempMap.put(sItem.toLowerCase(), CopadoCCMutilities.userMap.get(cuEmail));
+                            }
+                        } else if (null != tempObject.get(DISPLAY_NAME)) {
+                            keyValuepairTempMap.put(sItem.toLowerCase(), (String) tempObject.get(DISPLAY_NAME));
+                        }
+                    } else keyValuepairTempMap.put(sItem.toLowerCase(), String.valueOf(fields.get(sItem)));
+                }
+                //below four rows are in use for look up and external id purpose
+                keyValuepairTempMap.put('id', String.valueOf(currentValue.get('id')));
+                keyValuepairTempMap.put('url', String.valueOf(currentValue.get('url')));
+                keyValuepairTempMap.put('rev', String.valueOf(currentValue.get('rev')));
+                keyValuepairTempMap.put('projectid', pid);
+                userStoryList.add(keyValuepairTempMap);
+            }
+        }
+    }
+    
     //nested wrapper classes to use on direct Json casting on authentication callout step
     public class authWrapper{
         public String queryType;

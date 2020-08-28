@@ -7,8 +7,15 @@ You can see the related documentation: https://docs.copa.do/article/rmpc3lyhfd-c
 The latest version supports JIRA and Azure DevOps (formerly known as VSTS).
 If your provider is not one of these, check out this other repository: https://github.com/CopadoSolutions/CopadoIntegrations
 
+# Copado Change Management Integrations v1.12 update (08-11-2020)
+- Azure DevOps heap size issue on fetch operation : When syncing user stories from Azure DevOps, if the callout logs generated are too big and they exceed the max number of characters in the Response Body field, the Callout Log record is not created in the project.
 
-# Copado Change Management Integrations v1.11 update (08-11-2020)
+**Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
+```
+VSTSIntegration class
+```
+
+# Copado Change Management Integrations v1.11 update (08-28-2020)
 - KI-00251 fix on JIRA side : When syncing user stories from Jira, if the callout logs generated are too big and they exceed the max number of characters in the Response Body field, the Callout Log record is not created in the project.
 
 **Upgrade instructions**: Get the following components from the master branch of this repository into your Copado CCM Integrations Org.
@@ -64,8 +71,8 @@ Installation instructions can be found below.
 
 # Installation instructions
 To install the application, use one of the below URLs:
-- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000000b6k0
-- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000000b6k0
+- Production/Developer orgs: https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001G4k3
+- Sandbox orgs: https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1r000001G4k3
 
 # Getting started with Copado Change Management Integrations
 In order to customize your integration, follow these steps:

@@ -7,3 +7,5 @@ Project__c,Salesforce_Field_Name__c,Third_Party_Field_Name__c,Target_Field_Type_
 <INSERT_PROJECT_ID>,JIRA_Key__c,key,,FALSE,TRUE
 <INSERT_PROJECT_ID>,copado__Project__c,projectId,,FALSE,TRUE
 <INSERT_PROJECT_ID>,External_Id__c,id,,FALSE,TRUE
+<INSERT_PROJECT_ID>,copado__Sprint__c,sprintId,,FALSE,TRUE
+<INSERT_PROJECT_ID>,copado__Release__c,fixVersions,,FALSE,TRUE

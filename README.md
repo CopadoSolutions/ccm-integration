@@ -1,5 +1,9 @@
 # Copado Change Management Integrations
 
+## Important Note
+The 1.12 version from Summer 20' of our JIRA integration will no longer be supported after Summer 21'. Please reference [Copado Labs](https://success.copado.com/s/listing-detail?recordId=a540N000000TV9CQAW) for the new unlocked package link which was published in December 2021. [Here are the install instructions](https://docs.copado.com/article/s3u0ut4xy0-jira-integration-setup) for the new unlocked package for Winter 21'.
+
+
 Copado Solutions can integrate your external project management systems with Copado maintaining a bi-directional synchronization of your items between Copado Change Management and your external provider, such as Jira or Azure DevOps (formerly known as VSTS). This repository will hold the base layer of the integration code that may be extended by the community.
 
 You can see the related documentation: https://docs.copa.do/article/rmpc3lyhfd-copado-change-management-integrations
